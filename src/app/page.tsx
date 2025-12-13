@@ -502,7 +502,7 @@ export default function AiAgentPlatformPage() {
             </div>
           </div>
           <div className="mt-8 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 CODEEX AI. All rights reserved.</p>
+            <p>&copy; 2026 CODEEX AI. All rights reserved.</p>
             <p className="mt-1">CodeEx powered by Heoster.</p>
           </div>
         </div>

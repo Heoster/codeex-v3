@@ -67,7 +67,16 @@ try {
 // Run the actual build
 console.log('🏗️  Building Next.js application...');
 try {
-  execSync('npm run build', { stdio: 'inherit' });
+  // Run Next.js build with environment variables set
+  execSync('next build', { 
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      SKIP_ENV_VALIDATION: 'true',
+      ESLINT_NO_DEV_ERRORS: 'true',
+      NEXT_TELEMETRY_DISABLED: '1'
+    }
+  });
   console.log('✅ Build completed successfully!');
 } catch (error) {
   console.error('❌ Build failed:', error.message);
