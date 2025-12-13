@@ -27,6 +27,7 @@ if (typeof window === 'undefined') {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://codeex-ai.netlify.app'),
   title: {
     default: defaultSEO.title,
     template: '%s | CODEEX AI - Advanced Multi-Provider AI Assistant'

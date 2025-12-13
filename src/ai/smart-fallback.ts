@@ -204,9 +204,7 @@ export async function generateWithSmartFallback(
     const model = modelsToTry[i];
     
     try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`Attempting generation with ${model.name} (${model.id})...`);
-      }
+      console.log(`Attempting generation with ${model.name} (${model.id})...`);
       
       const response = await tryGenerateWithModel(model, request);
       
@@ -231,9 +229,7 @@ export async function generateWithSmartFallback(
       // If this was a critical failure and we have more models, trigger fallback
       if (isCriticalFailure(error) && i < modelsToTry.length - 1) {
         fallbackTriggered = true;
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`Critical failure detected, falling back to next model...`);
-        }
+        console.log(`Critical failure detected, falling back to next model...`);
         continue;
       }
       
@@ -259,8 +255,8 @@ export async function generateWithSmartFallback(
 export function getFriendlyErrorMessage(error: unknown): string {
   const errorMessage = error instanceof Error ? error.message : String(error);
   
-  if (errorMessage.includes('API key') || errorMessage.includes('GROQ_API_KEY')) {
-    return 'Please configure your Groq API key. Get a free key at https://console.groq.com/keys';
+  if (errorMessage.includes('API key') || errorMessage.includes('GROQ_API_KEY') || errorMessage.includes('GOOGLE_API_KEY') || errorMessage.includes('HUGGINGFACE_API_KEY')) {
+    return 'Please configure your API keys. Get free keys at: Groq (https://console.groq.com/keys), Google AI (https://aistudio.google.com/app/apikey), or Hugging Face (https://huggingface.co/settings/tokens)';
   }
   
   if (errorMessage.includes('Model is currently loading')) {

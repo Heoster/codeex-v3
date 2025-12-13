@@ -418,5 +418,75 @@ html {
   }
 }
 
-/* Import Jarvis animations */
-@import '../styles/jarvis-animations.css';
+/* Jarvis Animation Styles - Inline to avoid import issues */
+
+/* Animation delays for staggered effects */
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
+/* Custom keyframes for Jarvis animations */
+@keyframes jarvis-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes jarvis-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.6);
+  }
+}
+
+@keyframes jarvis-listening {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+}
+
+/* Utility classes for Jarvis animations */
+.jarvis-pulse {
+  animation: jarvis-pulse 2s ease-in-out infinite;
+}
+
+.jarvis-glow {
+  animation: jarvis-glow 2s ease-in-out infinite;
+}
+
+.jarvis-listening {
+  animation: jarvis-listening 1.5s ease-in-out infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .jarvis-pulse,
+  .jarvis-glow,
+  .jarvis-listening {
+    animation: none;
+  }
+}

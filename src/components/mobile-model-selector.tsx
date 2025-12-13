@@ -98,7 +98,7 @@ const DEFAULT_MODELS: ModelOption[] = modelsConfigData.models
   .map(model => ({
     id: model.id as ModelId,
     name: model.name,
-    provider: model.provider === 'groq' ? 'Groq' : model.provider === 'google' ? 'Google' : model.provider,
+    provider: model.provider === 'groq' ? 'Groq' : model.provider === 'google' ? 'Google' : model.provider === 'huggingface' ? 'Hugging Face' : model.provider,
     description: model.description,
     category: model.category as ModelCategory,
   }));

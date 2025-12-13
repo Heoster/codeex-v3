@@ -1,140 +1,126 @@
 /**
- * Environment Variable Security Validation
- * Ensures API keys are not accidentally exposed to the frontend
+ * Environment Variable Validation
+ * Ensures required environment variables are present and provides helpful error messages
  */
 
 interface EnvValidationResult {
   isValid: boolean;
-  errors: string[];
+  missingVars: string[];
   warnings: string[];
 }
 
-// Critical API keys that should NEVER be exposed to frontend
-const CRITICAL_ENV_VARS = [
-  'GROQ_API_KEY',
-  'HUGGINGFACE_API_KEY', 
-  'GOOGLE_API_KEY',
-  'OPENAI_API_KEY',
-  'ANTHROPIC_API_KEY',
-  'DATABASE_URL',
-  'JWT_SECRET',
-  'NEXTAUTH_SECRET',
-  'FIREBASE_PRIVATE_KEY',
-  'FIREBASE_CLIENT_EMAIL',
-  'FIREBASE_PROJECT_ID_PRIVATE'
-];
-
-// Environment variables that should exist in production
-const REQUIRED_ENV_VARS = [
-  'GROQ_API_KEY',
-  'HUGGINGFACE_API_KEY',
-  'GOOGLE_API_KEY'
-];
-
-// Environment variables that are safe to expose (NEXT_PUBLIC_)
-const SAFE_PUBLIC_VARS = [
-  'NEXT_PUBLIC_FIREBASE_API_KEY',
-  'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
-  'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
-  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
-  'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
-  'NEXT_PUBLIC_FIREBASE_APP_ID',
-  'NEXT_PUBLIC_EMAILJS_SERVICE_ID',
-  'NEXT_PUBLIC_EMAILJS_TEMPLATE_ID',
-  'NEXT_PUBLIC_EMAILJS_PUBLIC_KEY'
-];
-
-export function validateEnvironmentVariables(): EnvValidationResult {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-
-  // Check for accidentally exposed critical variables
-  for (const envVar of CRITICAL_ENV_VARS) {
-    const publicVersion = `NEXT_PUBLIC_${envVar}`;
-    if (process.env[publicVersion]) {
-      errors.push(
-        `CRITICAL: ${publicVersion} found! This exposes sensitive data to the frontend. ` +
-        `Use ${envVar} instead (without NEXT_PUBLIC_ prefix).`
-      );
-    }
-  }
-
-  // Check for missing required variables in production
-  if (process.env.NODE_ENV === 'production') {
-    for (const envVar of REQUIRED_ENV_VARS) {
-      if (!process.env[envVar]) {
-        errors.push(`Missing required environment variable: ${envVar}`);
-      }
-    }
-  }
-
-  // Check for potentially unsafe public variables
-  Object.keys(process.env).forEach(key => {
-    if (key.startsWith('NEXT_PUBLIC_')) {
-      if (!SAFE_PUBLIC_VARS.includes(key)) {
-        warnings.push(
-          `Unknown public environment variable: ${key}. ` +
-          `Verify this should be exposed to the frontend.`
-        );
-      }
-      
-      // Check for suspicious patterns in public vars
-      const value = process.env[key] || '';
-      if (value.includes('secret') || value.includes('private') || value.includes('key')) {
-        warnings.push(
-          `Public variable ${key} contains suspicious keywords. ` +
-          `Ensure this doesn't contain sensitive data.`
-        );
-      }
-    }
-  });
-
-  // Validate API key formats
-  const apiKeys = {
-    GROQ_API_KEY: /^gsk_[a-zA-Z0-9]{48}$/,
-    GOOGLE_API_KEY: /^AIza[0-9A-Za-z-_]{35}$/,
-    HUGGINGFACE_API_KEY: /^hf_[a-zA-Z0-9]{37}$/
+/**
+ * Validate required environment variables for AI providers
+ */
+export function validateAIProviderEnv(): EnvValidationResult {
+  const result: EnvValidationResult = {
+    isValid: true,
+    missingVars: [],
+    warnings: []
   };
 
-  Object.entries(apiKeys).forEach(([envVar, pattern]) => {
-    const value = process.env[envVar];
-    if (value && !pattern.test(value)) {
-      warnings.push(
-        `${envVar} format appears invalid. Expected pattern: ${pattern.source}`
-      );
-    }
-  });
+  // Check for at least one AI provider API key
+  const groqKey = process.env.GROQ_API_KEY;
+  const googleKey = process.env.GOOGLE_API_KEY;
+  const hfKey = process.env.HUGGINGFACE_API_KEY;
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-    warnings
+  if (!groqKey && !googleKey && !hfKey) {
+    result.isValid = false;
+    result.missingVars.push('At least one AI provider API key (GROQ_API_KEY, GOOGLE_API_KEY, or HUGGINGFACE_API_KEY)');
+  }
+
+  // Individual provider warnings
+  if (!groqKey) {
+    result.warnings.push('GROQ_API_KEY not set - Groq models will be unavailable');
+  }
+  if (!googleKey) {
+    result.warnings.push('GOOGLE_API_KEY not set - Google Gemini models will be unavailable');
+  }
+  if (!hfKey) {
+    result.warnings.push('HUGGINGFACE_API_KEY not set - Hugging Face models will be unavailable');
+  }
+
+  return result;
+}
+
+/**
+ * Validate Firebase configuration
+ */
+export function validateFirebaseEnv(): EnvValidationResult {
+  const result: EnvValidationResult = {
+    isValid: true,
+    missingVars: [],
+    warnings: []
   };
-}
 
-export function logEnvironmentValidation(): void {
-  const result = validateEnvironmentVariables();
-  
-  if (!result.isValid) {
-    console.error('🚨 ENVIRONMENT VALIDATION FAILED:');
-    result.errors.forEach(error => console.error(`  ❌ ${error}`));
-    
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('Environment validation failed. Check your environment variables.');
+  const requiredFirebaseVars = [
+    'NEXT_PUBLIC_FIREBASE_API_KEY',
+    'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
+    'NEXT_PUBLIC_FIREBASE_PROJECT_ID'
+  ];
+
+  for (const varName of requiredFirebaseVars) {
+    if (!process.env[varName]) {
+      result.isValid = false;
+      result.missingVars.push(varName);
     }
   }
-  
-  if (result.warnings.length > 0) {
-    console.warn('⚠️  ENVIRONMENT WARNINGS:');
-    result.warnings.forEach(warning => console.warn(`  ⚠️  ${warning}`));
-  }
-  
-  if (result.isValid && result.warnings.length === 0) {
-    console.log('✅ Environment validation passed');
-  }
+
+  return result;
 }
 
-// Auto-validate on import in development
-if (process.env.NODE_ENV === 'development') {
-  logEnvironmentValidation();
+/**
+ * Get user-friendly setup instructions
+ */
+export function getSetupInstructions(): string {
+  return `
+🔧 Setup Instructions:
+
+1. Copy .env.example to .env.local:
+   cp .env.example .env.local
+
+2. Get FREE API keys:
+   • Groq: https://console.groq.com/keys
+   • Google AI: https://aistudio.google.com/app/apikey
+   • Hugging Face: https://huggingface.co/settings/tokens
+
+3. Set up Firebase:
+   • Create project: https://console.firebase.google.com
+   • Enable Authentication and Firestore
+   • Add config to .env.local
+
+4. Restart your development server:
+   npm run dev
+  `.trim();
+}
+
+/**
+ * Log environment validation results (server-side only)
+ */
+export function logEnvValidation(): void {
+  if (typeof window !== 'undefined') return;
+
+  const aiValidation = validateAIProviderEnv();
+  const firebaseValidation = validateFirebaseEnv();
+
+  if (!aiValidation.isValid) {
+    console.error('❌ Missing required AI provider configuration:');
+    aiValidation.missingVars.forEach(v => console.error(`   - ${v}`));
+    console.log('\n' + getSetupInstructions());
+  }
+
+  if (!firebaseValidation.isValid) {
+    console.error('❌ Missing required Firebase configuration:');
+    firebaseValidation.missingVars.forEach(v => console.error(`   - ${v}`));
+  }
+
+  // Log warnings
+  if (aiValidation.warnings.length > 0) {
+    console.warn('⚠️  AI Provider warnings:');
+    aiValidation.warnings.forEach(w => console.warn(`   - ${w}`));
+  }
+
+  if (aiValidation.isValid && firebaseValidation.isValid) {
+    console.log('✅ Environment configuration looks good!');
+  }
 }

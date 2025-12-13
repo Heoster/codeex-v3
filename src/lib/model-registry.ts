@@ -4,6 +4,7 @@
  */
 
 import type { ModelConfig, ModelCategory, ProviderConfig, ProviderType } from './model-config';
+import { logEnvValidation } from './env-validation';
 
 interface ModelsConfigStore {
   providers: Record<string, ProviderConfig>;
@@ -51,6 +52,11 @@ function initializeProviderAvailability(): void {
 
 // Initialize on module load
 initializeProviderAvailability();
+
+// Log environment validation (server-side only)
+if (typeof window === 'undefined') {
+  logEnvValidation();
+}
 
 /**
  * Model Registry class for managing AI models

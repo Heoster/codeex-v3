@@ -5,7 +5,7 @@
 
 'use client';
 
-import { createContext, useContext, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, ReactNode, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { 
   initGA, 
@@ -39,7 +39,8 @@ interface AnalyticsProviderProps {
   children: ReactNode;
 }
 
-export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
+// Separate component for search params logic
+function AnalyticsCore({ children }: AnalyticsProviderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -185,6 +186,15 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
     <AnalyticsContext.Provider value={contextValue}>
       {children}
     </AnalyticsContext.Provider>
+  );
+}
+
+// Main provider with Suspense boundary
+export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
+  return (
+    <Suspense fallback={<div style={{ display: 'none' }} />}>
+      <AnalyticsCore>{children}</AnalyticsCore>
+    </Suspense>
   );
 }
 
