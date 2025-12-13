@@ -10,7 +10,7 @@ export default function TermsOfServicePage() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-4">Terms of Service</h1>
         <p className="text-lg text-muted-foreground">
-          Last updated: {new Date().toLocaleDateString()}
+          Last updated: December 13, 2024
         </p>
       </div>
 

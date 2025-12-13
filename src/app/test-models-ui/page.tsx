@@ -120,7 +120,7 @@ export default function TestModelsUI() {
         output: data.solution || data.answer || data.summary || data.recognizedContent || 'Response received',
         responseTime,
         success: true,
-        timestamp: new Date().toLocaleTimeString()
+        timestamp: new Date().toISOString()
       };
 
       setResults(prev => [result, ...prev]);
@@ -134,7 +134,7 @@ export default function TestModelsUI() {
         output: error instanceof Error ? error.message : 'Unknown error',
         responseTime: Date.now() - startTime,
         success: false,
-        timestamp: new Date().toLocaleTimeString()
+        timestamp: new Date().toISOString()
       };
 
       setResults(prev => [result, ...prev]);

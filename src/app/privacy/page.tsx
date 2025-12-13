@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
         <p className="text-lg text-muted-foreground">
-          Last updated: {new Date().toLocaleDateString()}
+          Last updated: December 13, 2024
         </p>
       </div>
 
@@ -196,7 +196,7 @@ export default function PrivacyPolicyPage() {
             <ul className="text-muted-foreground space-y-2">
               <li><strong>Email:</strong> privacy@codeex-ai.com</li>
               <li><strong>Support:</strong> <a href="/contact" className="text-primary hover:underline">Contact Form</a></li>
-              <li><strong>Address:</strong> [Your Business Address]</li>
+              <li><strong>Address:</strong> codeex@email.com</li>
             </ul>
           </CardContent>
         </Card>

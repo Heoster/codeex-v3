@@ -281,7 +281,7 @@ export default function AboutPage() {
           Made with <Heart className="inline h-4 w-4 text-red-500" /> by Heoster
         </p>
         <p className="mt-2">
-          &copy; {new Date().getFullYear()} CODEEX AI. All rights reserved.
+          &copy; 2024 CODEEX AI. All rights reserved.
         </p>
       </div>
     </div>

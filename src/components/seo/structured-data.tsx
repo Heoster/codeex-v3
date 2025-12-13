@@ -192,7 +192,7 @@ export function SoftwareStructuredData({
       name: 'CODEEX AI Team'
     },
     datePublished: '2024-01-01',
-    dateModified: new Date().toISOString().split('T')[0]
+    dateModified: '2024-12-13'
   };
 
   return (
