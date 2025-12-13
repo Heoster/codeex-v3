@@ -15,12 +15,36 @@ import type {
 
 function handleGenkitError(error: unknown): {error: string} {
   const message = error instanceof Error ? error.message : String(error);
-  console.error('Genkit flow failed:', error);
+  console.error('AI processing failed:', error);
 
-  // Check for the specific API key error and provide a helpful message.
+  // Check for specific error types and provide helpful messages
   if (message.includes('API key') || message.includes('API_KEY')) {
     return {
-      error: `AI processing failed. Your Groq API key is missing. Please create a free key at https://console.groq.com/keys and add it to the GROQ_API_KEY variable in your .env file.`,
+      error: `AI processing failed. API key is missing or invalid. Please check your environment variables.`,
+    };
+  }
+  
+  if (message.includes('timeout') || message.includes('TIMEOUT')) {
+    return {
+      error: `AI processing timed out. The request took too long to complete. Please try again.`,
+    };
+  }
+  
+  if (message.includes('rate limit') || message.includes('quota')) {
+    return {
+      error: `AI service is temporarily busy due to high demand. Please try again in a moment.`,
+    };
+  }
+  
+  if (message.includes('All models failed')) {
+    return {
+      error: `All AI models are currently unavailable. This may be due to high demand or maintenance. Please try again later.`,
+    };
+  }
+  
+  if (message.includes('Network') || message.includes('fetch')) {
+    return {
+      error: `Network error occurred while connecting to AI services. Please check your connection and try again.`,
     };
   }
 
@@ -36,6 +60,11 @@ export async function generateResponse(
     // Import and use the smart fallback directly instead of making HTTP calls
     // This avoids the localhost URL issue and is more efficient
     const { generateWithSmartFallback } = await import('@/ai/smart-fallback');
+    
+    // Add timeout for production serverless functions
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('AI request timeout after 25 seconds')), 25000);
+    });
     
     // Build system prompt based on settings
     const getToneInstructions = (tone: string) => {
@@ -99,8 +128,8 @@ ${getTechnicalInstructions(input.settings.technicalLevel)}
       preferredModelId = input.settings.model;
     }
 
-    // Use smart fallback system directly
-    const result = await generateWithSmartFallback({
+    // Use smart fallback system directly with timeout
+    const aiPromise = generateWithSmartFallback({
       prompt: input.message,
       systemPrompt,
       history: convertedHistory,
@@ -113,6 +142,8 @@ ${getTechnicalInstructions(input.settings.technicalLevel)}
         maxOutputTokens: 4096,
       },
     });
+
+    const result = await Promise.race([aiPromise, timeoutPromise]);
 
     return {
       content: result.response.text,
