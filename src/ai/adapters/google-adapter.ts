@@ -100,7 +100,9 @@ export class GoogleAdapter extends BaseProviderAdapter {
         ],
       };
       
-      console.log(`Calling Google Gemini API: ${apiUrl}`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Calling Google Gemini API: ${apiUrl}`);
+      }
       
       const response = await fetch(apiUrl, {
         method: 'POST',

@@ -22,7 +22,7 @@ export async function sendPasswordReset(email: string): Promise<{
     
     // Send password reset email
     await sendPasswordResetEmail(auth, email, {
-      url: `${process.env.NEXT_PUBLIC_APP_URL ||'https://codeex-ai.netlify.app','http://localhost:3000'}/login`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://codeex-ai.netlify.app'}/login`,
       handleCodeInApp: true,
     });
 

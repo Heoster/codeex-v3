@@ -161,7 +161,9 @@ ${getTechnicalInstructions(technicalLevel)}
           preferredModelId = model;
         }
         
-        console.log(`Requested model: ${model}, extracted ID: ${preferredModelId}`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Requested model: ${model}, extracted ID: ${preferredModelId}`);
+        }
       }
 
       const result = await generateWithSmartFallback({

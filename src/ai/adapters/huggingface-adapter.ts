@@ -83,8 +83,10 @@ export class HuggingFaceAdapter extends BaseProviderAdapter {
         stream: false,
       };
       
-      console.log(`Calling Hugging Face Router API: ${apiUrl}`);
-      console.log(`Model: ${model.modelId}`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Calling Hugging Face Router API: ${apiUrl}`);
+        console.log(`Model: ${model.modelId}`);
+      }
       
       const response = await fetch(apiUrl, {
         method: 'POST',

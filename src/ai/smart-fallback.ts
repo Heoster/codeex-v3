@@ -204,7 +204,9 @@ export async function generateWithSmartFallback(
     const model = modelsToTry[i];
     
     try {
-      console.log(`Attempting generation with ${model.name} (${model.id})...`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Attempting generation with ${model.name} (${model.id})...`);
+      }
       
       const response = await tryGenerateWithModel(model, request);
       
@@ -229,7 +231,9 @@ export async function generateWithSmartFallback(
       // If this was a critical failure and we have more models, trigger fallback
       if (isCriticalFailure(error) && i < modelsToTry.length - 1) {
         fallbackTriggered = true;
-        console.log(`Critical failure detected, falling back to next model...`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Critical failure detected, falling back to next model...`);
+        }
         continue;
       }
       
