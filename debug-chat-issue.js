@@ -13,7 +13,11 @@ async function testSimpleMessage() {
   try {
     const response = await fetch(`${APP_URL}/api/test-chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      credentials: 'same-origin',
       body: JSON.stringify({
         message: "Hello",
         history: [],
@@ -50,7 +54,11 @@ async function testSmartFallback() {
   try {
     const response = await fetch(`${APP_URL}/api/ai/solve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      credentials: 'same-origin',
       body: JSON.stringify({
         problem: "What is 2 + 2?",
         tone: 'helpful',

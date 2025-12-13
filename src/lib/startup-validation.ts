@@ -3,6 +3,8 @@
  * Validates critical configuration on app startup
  */
 
+import { validateEnvironmentVariables } from './env-validation';
+
 interface ValidationResult {
   valid: boolean;
   errors: string[];
@@ -147,6 +149,13 @@ export function validateEmailJSConfig(): { valid: boolean; message?: string } {
 export function validateStartup(): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
+  
+  // Environment variable security validation
+  const envValidation = validateEnvironmentVariables();
+  if (!envValidation.isValid) {
+    errors.push(...envValidation.errors.map(e => `❌ ${e}`));
+  }
+  warnings.push(...envValidation.warnings.map(w => `⚠️  ${w}`));
   
   // Critical: Groq API key
   const groqValidation = validateGroqKey();

@@ -50,7 +50,7 @@ export function SettingsDialog({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Settings</DialogTitle>
+          <DialogTitle className="text-2xl">Configuration</DialogTitle>
           <DialogDescription>
             Customize your AI experience and preferences
           </DialogDescription>

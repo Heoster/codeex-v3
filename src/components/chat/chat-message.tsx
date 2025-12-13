@@ -46,7 +46,7 @@ export function ChatMessage({message}: ChatMessageProps) {
     <TooltipProvider delayDuration={100}>
       <div
         className={cn(
-          'group flex items-start gap-3 md:gap-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-500',
+          'group flex items-start gap-3 md:gap-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 ease-out',
           !isAssistant && 'flex-row-reverse'
         )}
       >

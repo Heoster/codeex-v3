@@ -87,7 +87,7 @@ export function ChatLayout() {
       <SettingsDialog settings={settings} onSettingsChange={setSettings}>
         <Button variant="ghost" className="w-full justify-start">
           <SettingsIcon className="mr-2" />
-          Settings
+          Configuration
         </Button>
       </SettingsDialog>
       <ThemeToggle />
