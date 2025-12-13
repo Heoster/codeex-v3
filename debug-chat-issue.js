@@ -5,7 +5,7 @@
 
 require('dotenv').config({ path: '.env.local' });
 
-const APP_URL = 'http://localhost:3000';
+const APP_URL = 'https://codeex-ai.netlify.app';
 
 async function testSimpleMessage() {
   console.log('🔍 Testing simple message with auto model...');

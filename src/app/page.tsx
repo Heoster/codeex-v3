@@ -135,8 +135,8 @@ export default function AiAgentPlatformPage() {
           description: pageSEO.home.description,
           image: '/images/og-image.png',
           author: 'CODEEX AI Team',
-          publishedTime: '2024-01-01T00:00:00Z',
-          modifiedTime: '2024-12-13T00:00:00.000Z',
+          publishedTime: '2025-01-01T00:00:00Z',
+          modifiedTime: '2025-12-13T00:00:00.000Z',
           url: 'https://codeex-ai.netlify.app'
         }}
       />
@@ -502,7 +502,7 @@ export default function AiAgentPlatformPage() {
             </div>
           </div>
           <div className="mt-8 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2026 CODEEX AI. All rights reserved.</p>
+            <p>&copy; 2025 CODEEX AI. All rights reserved.</p>
             <p className="mt-1">CodeEx powered by Heoster.</p>
           </div>
         </div>

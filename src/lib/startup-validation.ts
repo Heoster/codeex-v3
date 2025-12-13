@@ -3,7 +3,7 @@
  * Validates critical configuration on app startup
  */
 
-import { validateEnvironmentVariables } from './env-validation';
+import { validateAIProviderEnv, validateFirebaseEnv } from './env-validation';
 
 interface ValidationResult {
   valid: boolean;
@@ -150,12 +150,18 @@ export function validateStartup(): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
   
-  // Environment variable security validation
-  const envValidation = validateEnvironmentVariables();
-  if (!envValidation.isValid) {
-    errors.push(...envValidation.errors.map(e => `❌ ${e}`));
+  // Environment variable validation
+  const aiValidation = validateAIProviderEnv();
+  const firebaseEnvValidation = validateFirebaseEnv();
+  
+  if (!aiValidation.isValid) {
+    errors.push(...aiValidation.missingVars.map(v => `❌ ${v}`));
   }
-  warnings.push(...envValidation.warnings.map(w => `⚠️  ${w}`));
+  warnings.push(...aiValidation.warnings.map(w => `⚠️  ${w}`));
+  
+  if (!firebaseEnvValidation.isValid) {
+    errors.push(...firebaseEnvValidation.missingVars.map(v => `❌ ${v}`));
+  }
   
   // Critical: Groq API key
   const groqValidation = validateGroqKey();
