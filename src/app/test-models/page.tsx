@@ -77,7 +77,7 @@ export default function TestModelsPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Model Testing Dashboard</h1>
         <p className="text-muted-foreground">
-          Test all available AI models and verify they're working correctly
+          Test all available AI models and verify they&apos;re working correctly
         </p>
       </div>
 
@@ -160,7 +160,7 @@ export default function TestModelsPage() {
         <CardHeader>
           <CardTitle>Model Testing</CardTitle>
           <CardDescription>
-            Test the selected model to verify it's working
+            Test the selected model to verify it&apos;s working
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

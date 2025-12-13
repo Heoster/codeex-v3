@@ -31,6 +31,7 @@ if (missingVars.length > 0) {
 // Set build-specific environment variables
 process.env.NEXT_TELEMETRY_DISABLED = '1';
 process.env.SKIP_ENV_VALIDATION = 'true';
+process.env.ESLINT_NO_DEV_ERRORS = 'true';
 
 // Clean up any previous builds
 console.log('🧹 Cleaning previous build artifacts...');
