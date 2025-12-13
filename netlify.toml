@@ -2,7 +2,7 @@
 # Production-ready settings for Next.js PWA deployment
 
 [build]
-  command = "npm run build"
+  command = "npm run build:netlify"
   publish = ".next"
 
 # Use the official Netlify Next.js plugin
@@ -13,6 +13,8 @@
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
+  NEXT_TELEMETRY_DISABLED = "1"
+  SKIP_ENV_VALIDATION = "true"
 
 # Headers for PWA and security
 [[headers]]

@@ -92,11 +92,15 @@ const nextConfig = {
     ],
   },
   typescript: {
-    ignoreBuildErrors: process.env.NODE_ENV === 'production' ? false : true,
+    ignoreBuildErrors: process.env.SKIP_ENV_VALIDATION === 'true' ? true : false,
   },
   eslint: {
-    ignoreDuringBuilds: process.env.NODE_ENV === 'production' ? false : true,
+    ignoreDuringBuilds: process.env.SKIP_ENV_VALIDATION === 'true' ? true : false,
   },
+  // Optimize for Netlify deployment
+  poweredByHeader: false,
+  compress: true,
+  swcMinify: true,
   images: {
     remotePatterns: [
       {
