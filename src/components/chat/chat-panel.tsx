@@ -4,6 +4,7 @@ import {type Chat, type Settings, type Message} from '@/lib/types';
 import {ChatInput} from './chat-input';
 import {ChatMessages} from './chat-messages';
 import {ExamplePrompts} from './example-prompts';
+import {MemoryManager} from '@/components/memory-manager';
 import {useState, useRef, useEffect, useCallback} from 'react';
 import {generateResponse} from '@/app/actions';
 import {useAuth} from '@/hooks/use-auth';
@@ -29,6 +30,7 @@ export function ChatPanel({
   const [isLoadingFromAI, setIsLoadingFromAI] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [lastRequestTime, setLastRequestTime] = useState(0);
+  const [showMemoryManager, setShowMemoryManager] = useState(false);
   const {user} = useAuth();
 
   const settingsRef = useRef(settings);
@@ -178,7 +180,11 @@ export function ChatPanel({
 
       <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 py-4">
         <div className="max-w-4xl mx-auto space-y-3">
-          <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+          <ChatInput 
+            onSendMessage={handleSendMessage} 
+            isLoading={isLoading}
+            onOpenMemoryManager={() => setShowMemoryManager(true)}
+          />
           <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
             <p className="hidden sm:block">
               Try commands like{' '}
@@ -195,6 +201,15 @@ export function ChatPanel({
           </div>
         </div>
       </div>
+
+      {/* Memory Manager Modal */}
+      {showMemoryManager && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+          <div className="fixed inset-4 z-50 overflow-auto rounded-lg border bg-background shadow-lg">
+            <MemoryManager onClose={() => setShowMemoryManager(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -57,6 +57,10 @@ export async function generateResponse(
   input: ProcessUserMessageInput
 ): Promise<{content: string; modelUsed?: string; autoRouted?: boolean; routingReasoning?: string} | {error: string}> {
   try {
+    // Import memory-aware processor for contextual intelligence
+    const { getMemoryAwareProcessor } = await import('@/lib/memory-aware-processor');
+    const memoryProcessor = getMemoryAwareProcessor();
+    
     // Import and use the smart fallback directly instead of making HTTP calls
     // This avoids the localhost URL issue and is more efficient
     const { generateWithSmartFallback } = await import('@/ai/smart-fallback');
@@ -65,6 +69,30 @@ export async function generateResponse(
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('AI request timeout after 25 seconds')), 25000);
     });
+    
+    // Process message with contextual memory
+    let enhancedPrompt = input.message;
+    let memoryContext = '';
+    
+    try {
+      const memoryResult = await memoryProcessor.processMessage({
+        message: input.message,
+        timestamp: new Date(),
+        // Extract intent from message or use general as fallback
+        intent: input.message.toLowerCase().includes('plan') ? 'planning' :
+               input.message.toLowerCase().includes('error') || input.message.toLowerCase().includes('bug') ? 'troubleshooting' :
+               input.message.toLowerCase().includes('how') || input.message.toLowerCase().includes('what') ? 'learning' :
+               input.message.toLowerCase().includes('create') || input.message.toLowerCase().includes('build') ? 'creating' :
+               input.message.toLowerCase().includes('review') || input.message.toLowerCase().includes('status') ? 'reviewing' :
+               'general'
+      });
+      
+      enhancedPrompt = memoryResult.enhancedPrompt;
+      memoryContext = memoryResult.memoryContext;
+    } catch (memoryError) {
+      console.warn('Memory processing failed, using basic prompt:', memoryError);
+      // Continue with original message if memory processing fails
+    }
     
     // Build system prompt based on settings
     const getToneInstructions = (tone: string) => {
@@ -89,7 +117,7 @@ export async function generateResponse(
       }
     };
 
-    const systemPrompt = `You are CODEEX AI, an intelligent and versatile assistant created by Heoster. You excel at helping users with coding, problem-solving, learning, and general questions.
+    let systemPrompt = `You are CODEEX AI, an intelligent and versatile assistant created by Heoster. You excel at helping users with coding, problem-solving, learning, and general questions.
 
 ## Your Personality & Communication Style
 ${getToneInstructions(input.settings.tone)}
@@ -116,6 +144,18 @@ ${getTechnicalInstructions(input.settings.technicalLevel)}
 - For errors: Explain what went wrong and how to fix it.
 - Remember context from the conversation to provide coherent, continuous assistance.`;
 
+    // Add memory context to system prompt if available
+    if (memoryContext) {
+      systemPrompt += `
+
+## Contextual Memory
+You have access to relevant memories from previous conversations:
+
+${memoryContext}
+
+Use this context to provide more personalized and contextually aware responses. Reference relevant memories when they help answer the current question, but don't force connections if they're not relevant.`;
+    }
+
     // Convert history to the format expected by smart fallback
     const convertedHistory = input.history.map((msg: any) => ({
       role: (msg.role === 'assistant' ? 'model' : 'user') as 'user' | 'model' | 'assistant',
@@ -130,7 +170,7 @@ ${getTechnicalInstructions(input.settings.technicalLevel)}
 
     // Use smart fallback system directly with timeout
     const aiPromise = generateWithSmartFallback({
-      prompt: input.message,
+      prompt: enhancedPrompt,
       systemPrompt,
       history: convertedHistory,
       preferredModelId,
@@ -145,13 +185,27 @@ ${getTechnicalInstructions(input.settings.technicalLevel)}
 
     const result = await Promise.race([aiPromise, timeoutPromise]);
 
+    // Store conversation in memory for future context
+    try {
+      await memoryProcessor.storeConversationMemory(
+        input.message,
+        result.response.text,
+        {
+          message: input.message,
+          timestamp: new Date()
+        }
+      );
+    } catch (memoryError) {
+      console.warn('Failed to store conversation memory:', memoryError);
+      // Don't fail the request if memory storage fails
+    }
+
     return {
       content: result.response.text,
       modelUsed: result.modelUsed,
       autoRouted: result.fallbackTriggered,
       routingReasoning: result.fallbackTriggered ? 'Fallback triggered' : 'Direct model usage'
     };
-
 
   } catch (error) {
     console.error('generateResponse error:', error);

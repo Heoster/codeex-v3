@@ -7,7 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
-import {type User, onAuthStateChanged, getAuth} from 'firebase/auth';
+import {type User, onAuthStateChanged, getAuth, signOut as firebaseSignOut} from 'firebase/auth';
 import {app} from '@/lib/firebase';
 import {useRouter} from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,16 +15,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  signOut: async () => {},
 });
 
 export function AuthProvider({children}: {children: ReactNode}) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const signOut = async () => {
+    const auth = getAuth(app);
+    await firebaseSignOut(auth);
+  };
 
   useEffect(() => {
     const auth = getAuth(app);
@@ -37,7 +44,7 @@ export function AuthProvider({children}: {children: ReactNode}) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{user, loading}}>
+    <AuthContext.Provider value={{user, loading, signOut}}>
       {children}
     </AuthContext.Provider>
   );

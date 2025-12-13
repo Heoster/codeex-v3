@@ -96,25 +96,24 @@ export default function AiAgentPlatformPage() {
       return;
     }
 
-    // Check if app is running as installed PWA (standalone mode)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
-      || (window.navigator as any).standalone === true;
+    // Import PWA utilities dynamically to avoid SSR issues
+    import('@/lib/pwa-utils').then(({ shouldShowLandingPage }) => {
+      // Check if user should see landing page (skips for PWA users)
+      if (!shouldShowLandingPage()) {
+        router.push(user ? '/chat' : '/login');
+        return;
+      }
 
-    // If running as PWA, skip landing page and go directly to chat/login
-    if (isStandalone) {
-      router.push(user ? '/chat' : '/login');
-      return;
-    }
+      const hasVisitedBefore = localStorage.getItem('hasVisitedBefore');
 
-    const hasVisitedBefore = localStorage.getItem('hasVisitedBefore');
-
-    if (user && hasVisitedBefore) {
-      // If the user is logged in and has visited before, redirect to the chat page.
-      router.push('/chat');
-    } else if (!hasVisitedBefore) {
-      // On the very first visit, set the flag so next time they'll be redirected.
-      localStorage.setItem('hasVisitedBefore', 'true');
-    }
+      if (user && hasVisitedBefore) {
+        // If the user is logged in and has visited before, redirect to the chat page.
+        router.push('/chat');
+      } else if (!hasVisitedBefore) {
+        // On the very first visit, set the flag so next time they'll be redirected.
+        localStorage.setItem('hasVisitedBefore', 'true');
+      }
+    });
   }, [user, loading, router]);
 
   return (
@@ -133,16 +132,10 @@ export default function AiAgentPlatformPage() {
           </Link>
           <nav className="hidden items-center gap-6 md:flex">
             <Link
-              href="/test-models-ui"
+              href="/features"
               className="text-sm font-medium text-muted-foreground hover:text-foreground"
             >
-              Test Models
-            </Link>
-            <Link
-              href="/pricing"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
-            >
-              Pricing
+              Features
             </Link>
             <Link
               href="/documentation"
@@ -151,10 +144,16 @@ export default function AiAgentPlatformPage() {
               Docs
             </Link>
             <Link
-              href="/blog"
+              href="/faq"
               className="text-sm font-medium text-muted-foreground hover:text-foreground"
             >
-              Blog
+              FAQ
+            </Link>
+            <Link
+              href="/contact"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
+              Support
             </Link>
           </nav>
           <div className="flex items-center gap-2 md:gap-4">
@@ -353,10 +352,10 @@ export default function AiAgentPlatformPage() {
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
-                    href="/blog"
+                    href="/faq"
                     className="text-muted-foreground hover:text-foreground"
                   >
-                    Blog
+                    FAQ
                   </Link>
                 </li>
                 <li>
@@ -378,22 +377,22 @@ export default function AiAgentPlatformPage() {
               </ul>
             </div>
             <div className="space-y-4">
-              <h4 className="font-semibold text-foreground">Company</h4>
+              <h4 className="font-semibold text-foreground">Legal</h4>
               <ul className="space-y-2 text-sm">
-                <li>
-                  <Link
-                    href="/careers"
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    Careers
-                  </Link>
-                </li>
                 <li>
                   <Link
                     href="/privacy"
                     className="text-muted-foreground hover:text-foreground"
                   >
                     Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/terms"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Terms of Service
                   </Link>
                 </li>
               </ul>
