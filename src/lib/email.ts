@@ -21,6 +21,13 @@ export interface WelcomeEmailParams {
   app_url: string;
 }
 
+export interface TestEmailParams {
+  to_email: string;
+  to_name?: string;
+  subject?: string;
+  message?: string;
+}
+
 export interface EmailResponse {
   success: boolean;
   response?: EmailJSResponseStatus;
@@ -96,6 +103,114 @@ export async function sendWelcomeEmail(email: string, displayName: string): Prom
     if (process.env.NODE_ENV === 'development') {
       console.error('Failed to send welcome email:', error);
     }
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
+ * Send a test/placeholder email (server-side simulation)
+ */
+export async function sendTestEmail(params: TestEmailParams): Promise<EmailResponse> {
+  const defaultSubject = 'CODEEX AI - Test Email Service';
+  const defaultMessage = `
+🚀 CODEEX AI Email Service Test
+
+Hello ${params.to_name || 'User'},
+
+This is a test email from CODEEX AI to verify that our email service is working correctly.
+
+📧 Email Details:
+• Recipient: ${params.to_email}
+• Service: EmailJS Integration
+• Status: Testing Phase
+• Timestamp: ${new Date().toISOString()}
+
+🤖 CODEEX AI Features:
+✨ Multi-Provider AI System:
+• Groq (Fast inference - 14,400 req/day)
+• Google Gemini 2.5 Flash
+• Hugging Face Router API
+• 9 AI Models with Smart Fallback
+
+🎯 Key Features:
+• Jarvis Mode with Voice Controls & Animations
+• Contextual Memory System
+• Visual Problem Solving (Math equations)
+• Real-time Web Search with Citations
+• PDF Document Analysis
+• Multi-Chat Management
+• PWA Support (Installable App)
+
+🔐 Security & User Management:
+• Firebase Authentication
+• Email Verification
+• Password Security Validation
+• Privacy Policy & Terms of Service
+• Complete User Profile Management
+
+🎨 User Experience:
+• Rich Jarvis Animations (8 animation states)
+• Responsive Mobile Design
+• Voice Recognition & Text-to-Speech
+• Dark/Light Theme Support
+• Professional UI/UX
+
+If you received this email, our email service is functioning perfectly! 🎉
+
+---
+🌐 Visit CODEEX AI: ${APP_URL}
+📧 Support: codeex.care@gmail.com
+👨‍💻 Developer: Heoster
+🔗 GitHub: https://github.com/Heoster/codeex-v3
+
+Best regards,
+The CODEEX AI Team
+  `.trim();
+
+  // For development/testing, we'll simulate the email sending
+  if (process.env.NODE_ENV === 'development') {
+    console.log('\n📧 EMAIL SIMULATION - DEVELOPMENT MODE');
+    console.log('=====================================');
+    console.log('To:', params.to_email);
+    console.log('Subject:', params.subject || defaultSubject);
+    console.log('Message:');
+    console.log(params.message || defaultMessage);
+    console.log('=====================================\n');
+    
+    // Simulate successful email sending
+    return {
+      success: true,
+      response: {
+        status: 200,
+        text: 'Email simulated successfully in development mode'
+      } as any
+    };
+  }
+
+  // In production, try to use EmailJS if configured
+  if (!isEmailConfigured() || !CONTACT_TEMPLATE_ID) {
+    return { 
+      success: false, 
+      error: 'Email service is not configured. Please set up EmailJS in your environment variables.' 
+    };
+  }
+
+  try {
+    const response = await emailjs.send(SERVICE_ID!, CONTACT_TEMPLATE_ID!, {
+      user_name: params.to_name || 'Test User',
+      user_email: params.to_email,
+      message: params.message || defaultMessage,
+      subject: params.subject || defaultSubject,
+      app_url: APP_URL,
+      app_name: 'CODEEX AI',
+      test_email: true,
+    }, USER_ID!);
+    
+    console.log('Test email sent successfully to:', params.to_email);
+    return { success: true, response };
+  } catch (error) {
+    console.error('Failed to send test email:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return { success: false, error: errorMessage };
   }

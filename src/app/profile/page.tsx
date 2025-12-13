@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { getPWAStatus } from '@/lib/pwa-utils';
 
 export default function ProfilePage() {
-  const { user, loading, updateProfile, deleteAccount } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState('');
@@ -34,8 +34,9 @@ export default function ProfilePage() {
     if (!user) return;
     
     try {
-      await updateProfile({ displayName });
+      // For now, just update local state - implement Firebase profile update later
       setIsEditing(false);
+      console.log('Profile update functionality to be implemented');
     } catch (error) {
       console.error('Failed to update profile:', error);
     }
@@ -50,8 +51,10 @@ export default function ProfilePage() {
     
     if (confirmed) {
       try {
-        await deleteAccount();
+        // For now, just sign out - implement account deletion later
+        await signOut();
         router.push('/');
+        console.log('Account deletion functionality to be implemented');
       } catch (error) {
         console.error('Failed to delete account:', error);
       }
@@ -236,6 +239,30 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
+        {/* Security Actions */}
+        {user && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Security</CardTitle>
+              <CardDescription>Manage your account security</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Button variant="outline" asChild>
+                  <a href="/change-password">
+                    Change Password
+                  </a>
+                </Button>
+                <Button variant="outline" asChild>
+                  <a href="/privacy">
+                    Privacy Settings
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Quick Actions */}
         <Card>
           <CardHeader>
@@ -260,8 +287,8 @@ export default function ProfilePage() {
                 </a>
               </Button>
               <Button variant="outline" asChild>
-                <a href="/documentation">
-                  View Docs
+                <a href="/about">
+                  About Developers
                 </a>
               </Button>
             </div>

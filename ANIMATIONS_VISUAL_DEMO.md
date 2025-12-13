@@ -1,397 +1,174 @@
-# AI Response Animations - Visual Demo Guide
+# Jarvis Animations Visual Demo Guide
 
-## 📺 Seeing the Animations in Action
+## 🎬 How to Test All Animation States
 
-### Method 1: Start Development Server
-```bash
-npm run dev
+### 1. Accessing Jarvis Mode
+1. Navigate to the chat interface (`/chat`)
+2. Look for the **Sparkles icon** button in the chat input (right side)
+3. Click to activate Jarvis Mode
+
+### 2. Animation State Testing
+
+#### 🟣 Idle State
+- **When**: Jarvis Mode is activated but not actively listening
+- **Visual**: Purple orb with gentle glow and Sparkles icon
+- **Label**: "Ready"
+
+#### 🟣 Activating State  
+- **When**: Clicking the Jarvis activation button
+- **Visual**: Full-screen overlay with expanding rings and spinning Sparkles
+- **Duration**: 2 seconds with progress bar
+- **Text**: "Jarvis Activating - Voice assistant is starting up..."
+
+#### 🔵 Listening State
+- **When**: Jarvis is actively listening for voice input
+- **Visual**: Blue pulsating orb with Mic icon
+- **Features**: 
+  - Pulsing rings around the orb
+  - Sound wave visualization (8 bars)
+  - "Listening..." label
+- **Trigger**: Click microphone button or use wake word
+
+#### 🟡 Processing State
+- **When**: Jarvis received input and is generating response
+- **Visual**: Yellow orb with spinning Loader2 icon
+- **Features**:
+  - Rotating border spinner
+  - "Thinking..." label
+- **Duration**: While AI processes the request
+
+#### 🟢 Speaking State
+- **When**: Jarvis is providing voice response (TTS active)
+- **Visual**: Green pulsating orb with animated Sparkles
+- **Features**:
+  - Pulsing rings
+  - Sound wave visualization (16 bars for richer display)
+  - "Speaking..." label
+
+#### 🔴 Error State
+- **When**: Voice recognition fails or API error occurs
+- **Visual**: Red orb with AlertCircle icon
+- **Features**:
+  - Shake animation (3 repetitions)
+  - "Error" label
+- **Auto-recovery**: Returns to idle after 3 seconds
+
+#### 🟢 Success State
+- **When**: Task completed successfully
+- **Visual**: Green orb with CheckCircle icon
+- **Features**:
+  - Scale bounce animation
+  - "Complete" label
+- **Duration**: 2 seconds before returning to idle
+
+#### 🟣 Deactivating State
+- **When**: Turning off Jarvis Mode
+- **Visual**: Full-screen overlay with shrinking animation
+- **Duration**: 2 seconds
+- **Text**: "Jarvis Deactivating - Voice assistant is shutting down..."
+
+### 3. Interactive Elements
+
+#### Stop Listening Button
+- **Location**: Next to microphone when Jarvis is active and listening
+- **Visual**: Red square icon
+- **Function**: Immediately stops voice recognition
+- **Animation**: Button scales and changes color on press
+
+#### Full-Screen Overlay
+- **Trigger**: Activation/deactivation sequences
+- **Features**:
+  - Animated background particles (20 floating dots)
+  - Grid pattern overlay
+  - Feature icons showing active capabilities
+  - Audio visualization during listening/speaking
+- **Interaction**: Tap anywhere to minimize
+
+### 4. Sound Wave Visualizations
+
+#### Chat Input Visualization
+- **Bars**: 8 animated bars
+- **Colors**: Blue (listening) / Green (speaking)
+- **Animation**: Real-time response to audio levels
+- **Position**: Extends from sides of main orb
+
+#### Full-Screen Visualization  
+- **Bars**: 16 animated bars
+- **Height**: Up to 64px responsive to audio
+- **Update Rate**: 50ms for smooth animation
+- **Opacity**: Dynamic based on audio level (0.4-1.0)
+
+### 5. Responsive Behavior
+
+#### Mobile Optimizations
+- **Orb Size**: Scales appropriately for touch targets
+- **Animation Performance**: Optimized for mobile GPUs
+- **Touch Feedback**: Proper haptic-style visual feedback
+
+#### Accessibility Features
+- **Reduced Motion**: Respects `prefers-reduced-motion` setting
+- **High Contrast**: Enhanced visibility in high contrast mode
+- **Screen Readers**: Proper ARIA labels and state announcements
+
+### 6. Testing Scenarios
+
+#### Complete Flow Test
+1. **Activate**: Click Jarvis button → See activation overlay
+2. **Listen**: Click microphone → Blue listening animation
+3. **Speak**: Say something → Sound waves respond
+4. **Process**: Stop speaking → Yellow processing animation
+5. **Respond**: AI responds → Green speaking animation (if TTS enabled)
+6. **Complete**: Task done → Green success animation
+7. **Deactivate**: Click Jarvis button → Deactivation overlay
+
+#### Error Testing
+1. **Network Error**: Disconnect internet during processing
+2. **Voice Error**: Make noise without clear speech
+3. **Permission Error**: Deny microphone permissions
+
+#### Performance Testing
+1. **Rapid State Changes**: Quickly start/stop listening
+2. **Long Sessions**: Keep Jarvis active for extended periods
+3. **Background Usage**: Test with other apps running
+
+### 7. Animation Customization
+
+#### CSS Variables Available
+```css
+--jarvis-primary-color: #a855f7 (purple)
+--jarvis-listening-color: #3b82f6 (blue)  
+--jarvis-speaking-color: #22c55e (green)
+--jarvis-processing-color: #eab308 (yellow)
+--jarvis-error-color: #ef4444 (red)
 ```
-Then navigate to the chat interface and send a message. Watch the thinking animation!
 
-### Method 2: Component Preview
-Add this to a test component to see all variants:
+#### Animation Timing
+- **State Transitions**: 300ms ease
+- **Pulse Animations**: 1.5-2s infinite
+- **Overlay Animations**: 2s with easing
+- **Sound Waves**: 50ms update rate
 
-```tsx
-'use client';
+### 8. Browser Compatibility
 
-import { AIThinkingIndicator } from '@/components/chat/ai-thinking-indicator';
-import { TypingIndicator, StreamingIndicator, ThinkingWave } from '@/components/chat/indicators';
+#### Supported Features
+- **Chrome/Edge**: Full support including Web Speech API
+- **Firefox**: Visual animations (limited voice support)
+- **Safari**: iOS voice support with visual animations
+- **Mobile Browsers**: Touch-optimized animations
 
-export function AnimationDemo() {
-  return (
-    <div className="space-y-8 p-8">
-      <div>
-        <h2 className="text-xl font-bold mb-4">Default Thinking Indicator</h2>
-        <AIThinkingIndicator variant="default" showThinkingText={true} />
-      </div>
-
-      <div>
-        <h2 className="text-xl font-bold mb-4">Compact Thinking Indicator</h2>
-        <AIThinkingIndicator variant="compact" showThinkingText={true} />
-      </div>
-
-      <div>
-        <h2 className="text-xl font-bold mb-4">Minimal Thinking Indicator</h2>
-        <AIThinkingIndicator variant="minimal" />
-      </div>
-
-      <div>
-        <h2 className="text-xl font-bold mb-4">Typing Indicator</h2>
-        <div>
-          Response text <TypingIndicator duration={600} />
-        </div>
-      </div>
-
-      <div>
-        <h2 className="text-xl font-bold mb-4">Streaming Indicator</h2>
-        <StreamingIndicator />
-      </div>
-
-      <div>
-        <h2 className="text-xl font-bold mb-4">Thinking Wave</h2>
-        <ThinkingWave />
-      </div>
-    </div>
-  );
-}
-```
+#### Fallback Behavior
+- **No Web Speech API**: Visual animations still work
+- **Reduced Motion**: Static states with color changes
+- **Low Performance**: Simplified animations automatically
 
 ---
 
-## 🎬 Animation Breakdown
+## 🎯 Pro Tips for Best Experience
 
-### Default Indicator - Step by Step
+1. **Use Chrome/Edge** for full voice functionality
+2. **Allow microphone permissions** for complete experience  
+3. **Speak clearly** for best voice recognition
+4. **Test in quiet environment** for optimal audio detection
+5. **Enable TTS** in Jarvis settings for speaking animations
 
-#### Step 1: Avatar Appears (0-500ms)
-```
-    👤 (animated in with fade + slide)
-```
-
-#### Step 2: Header with Sparkles (0-500ms)
-```
-✨ CODEEX AI is thinking
-```
-
-#### Step 3: Skeleton Lines Appear (500-1000ms)
-```
-─────────────────     (pulse starts)
-───────────────────── (pulse starts with 0.1s delay)
-───────────────────   (pulse starts with 0.2s delay)
-```
-
-#### Step 4: Bouncing Dots Animate (1000ms+)
-```
-↓  ↑  ↓    (bouncing in wave pattern)
-```
-
-#### Step 5: Status Text Fades In
-```
-Processing your request...
-```
-
-### Visual Timeline
-```
-Time:  0ms        500ms       1000ms      1500ms      2000ms
-       |          |            |           |            |
-Avatar:|━━━━━━━━━|            |           |            |
-Header:|━━━━━━━━━|            |           |            |
-Skel 1:|━━━━━━━━━|━━━━━━━━━━━|━━━━━━━━━━|━━━━━━━━━━|
-Skel 2:|    0.1s |━━━━━━━━━━|━━━━━━━━━━|━━━━━━━━━━|
-Skel 3:|    0.2s      |━━━━━━━━━━|━━━━━━━━━━|━━━━━━━━━━|
-Dots:  |          |━━━↑━━━↓━━━↑━━━↓━━━↑━━━↓━━━|
-Status:|          |        |━━━━━━━━━━|━━━━━━━━━━|
-```
-
----
-
-## 🎨 Animation States
-
-### State 1: Idle (Before User Query)
-```
-┌─────────────────────────────┐
-│  [Chat interface ready]     │
-└─────────────────────────────┘
-```
-
-### State 2: Thinking (User sends message)
-```
-┌─────────────────────────────┐
-│ ✨ CODEEX AI is thinking    │
-├─────────────────────────────┤
-│ ─────────────                │
-│ ──────────────────           │
-│ ────────────────             │
-│ Processing your request...   │
-│ ● ● ●  (bouncing)           │
-└─────────────────────────────┘
-```
-
-### State 3: Responding (AI generates response)
-```
-┌─────────────────────────────┐
-│ The answer to your question │
-│ is... ▌                      │
-│ (streaming text)             │
-└─────────────────────────────┘
-```
-
-### State 4: Complete (Response finished)
-```
-┌─────────────────────────────┐
-│ The answer to your question │
-│ is: [complete response]     │
-│ ⏱️ 2.3s ago                 │
-│ [Copy button]               │
-└─────────────────────────────┘
-```
-
----
-
-## 🔄 Animation Loop
-
-The animations continuously loop while loading:
-
-### Skeleton Line Pulse Cycle (2s)
-```
-Opacity:
-100% ━━━━━┓
-    ╱    ╲
-    │    ╲
-    │     ╲
- 60% ────────┃
-         ╱   │
-        ╱    │
-    ╱──      │
-100%────────┛
-
-Time: 0s    1s    2s
-```
-
-### Bouncing Dots Cycle (1.4s)
-```
-Dot 1:  ↑─────→↓     (0s delay)
-Dot 2:  ↓─────→↑     (0.2s delay)
-Dot 3:  →↓─────↑     (0.4s delay)
-
-Result: Wave effect moving across
-```
-
-### Spinner Rotation (Continuous)
-```
-  ↗️
-↗️  ↖️
-  ↖️
-
-Rotates continuously, 1 full rotation per animation cycle
-```
-
----
-
-## 🎯 Animation Timing Details
-
-### Message Entry (from chat-message.tsx)
-- **Duration:** 500ms
-- **Easing:** ease-out (deceleration)
-- **Effect:** Fade-in + slide-in-from-bottom
-- **Direction:** Bottom to top
-
-### Thinking Indicator (from ai-thinking-indicator.tsx)
-- **Duration:** 500ms entry + continuous loops
-- **Easing:** Multiple (pulse, bounce)
-- **Effect:** Fade-in + slide-in-from-bottom
-
-### Pulse Animation
-- **Duration:** 2s per cycle
-- **Easing:** cubic-bezier(0.4, 0, 0.6, 1)
-- **Range:** 100% → 60% → 100%
-
-### Bounce Animation
-- **Duration:** 1.4s per cycle
-- **Easing:** ease-in-out
-- **Range:** 0px → -4px → 0px
-
----
-
-## 🎬 Different Scenarios
-
-### Scenario 1: Quick Response (< 1s)
-```
-User: "Hello"
-    ▼
-    ✨ CODEEX AI is thinking...
-    ▼ (0.3s later)
-    [Response appears]
-    ▼
-(Message with no loading animation visible)
-```
-
-### Scenario 2: Medium Response (1-5s)
-```
-User: "Explain quantum computing"
-    ▼
-    ✨ CODEEX AI is thinking...
-    (skeleton lines animate)
-    (bouncing dots animate)
-    ● ● ●  (bounces 3-4 times)
-    ▼
-    [Response appears]
-    ▼
-(Message with timestamp)
-```
-
-### Scenario 3: Long Response (> 5s)
-```
-User: "Write a complete program"
-    ▼
-    ✨ CODEEX AI is thinking...
-    (skeleton lines animate multiple times)
-    (bouncing dots bounce many times)
-    ● ● ● ● ● ● ● ...
-    ▼
-    [Response starts streaming]
-    ▼
-    The answer is: ▌ (typing indicator)
-    ▼
-(Full response shown with code blocks)
-```
-
----
-
-## 🎨 Color & Styling
-
-### Avatar Ring
-- **Base Color:** Primary color
-- **Ring Opacity:** 20%
-- **Ring Offset:** 2px with background color
-
-### Skeleton Lines
-- **Color:** Muted (secondary background)
-- **Opacity:** 40-60%
-- **Border Radius:** 4px
-
-### Dots
-- **Color:** Primary
-- **Size:** 2px diameter
-- **Spacing:** 4px gap
-- **Opacity:** 50-70%
-
-### Text
-- **"CODEEX AI is thinking":** Font-semibold, muted-foreground color
-- **"Processing your request...":** Font-xs, muted-foreground/70 opacity
-
----
-
-## 🖼️ Visual Hierarchy
-
-### Default Indicator Layout
-```
-┌─────────────────────────────────┐
-│ Avatar  ✨ CODEEX AI is thinking │
-├─────────────────────────────────┤
-│        ─────────────────         │
-│        ──────────────────────    │
-│        ──────────────────      │
-│                                 │
-│        Processing your request..│
-│        ● ● ●                   │
-└─────────────────────────────────┘
-
-Hierarchy:
-1. Avatar (identity)
-2. Header text + icon (explains state)
-3. Skeleton lines (shows content loading)
-4. Status dots (shows animation/life)
-5. Status text (explains action)
-```
-
-### Compact Indicator Layout
-```
-┌─────────────────────┐
-│ Avatar  Thinking    │
-│         ● ● ●      │
-└─────────────────────┘
-
-Hierarchy:
-1. Avatar (identity)
-2. Status text (state)
-3. Dots (animation)
-```
-
----
-
-## 💻 Browser DevTools Tips
-
-### Inspecting Animations
-1. **DevTools → Elements** - Select thinking indicator
-2. **Inspect CSS** - See animation classes
-3. **DevTools → Animations** - Watch animation timeline
-
-### Slowing Down Animations
-1. **DevTools → ⋯ → More tools → Animations**
-2. **Slow down animations** slider
-3. **Default: 1x**
-4. **Set to: 0.1x - 0.25x for inspection**
-
-### Performance Profiling
-1. **DevTools → Performance**
-2. **Record** - Start test
-3. **Send chat message** to trigger animations
-4. **Stop** - View flame charts
-5. **Check GPU usage and frame rate**
-
----
-
-## 🎯 Testing Checklist
-
-- [ ] Thinking indicator appears when message sent
-- [ ] Skeleton lines pulse smoothly
-- [ ] Dots bounce in wave pattern
-- [ ] Animation loops continuously until response
-- [ ] All variants render correctly (default, compact, minimal)
-- [ ] Text labels are visible and clear
-- [ ] Icons rotate/animate smoothly
-- [ ] No janky or stuttering animations
-- [ ] Responsive on mobile (shrink appropriately)
-- [ ] Dark mode colors look good
-- [ ] Light mode colors look good
-- [ ] Animation stops when response arrives
-- [ ] Message entry animation is smooth
-- [ ] Timestamp appears correctly
-- [ ] Copy button works on hover
-
----
-
-## 📊 Performance Metrics
-
-### CPU/GPU Usage During Animation
-```
-CPU:  5-10% (minimal)
-GPU:  Used (transform + opacity accelerated)
-FPS:  60fps stable
-Memory: <1MB
-```
-
-### Network Impact
-```
-No additional network calls
-No additional image downloads
-Pure CSS animations
-```
-
----
-
-## 🚀 Loading States by Duration
-
-| Duration | Visual Feedback | User Perception |
-|----------|-----------------|-----------------|
-| < 500ms | Quick animation | Instant |
-| 500ms-1s | Skeleton lines | Fast |
-| 1-2s | Multiple skeleton cycles | Normal |
-| 2-5s | Bouncing dots visible | Loading |
-| > 5s | Multiple dot cycles | Heavy processing |
-
----
-
-**Note:** These guides are visual representations. Actual animations are smoother and more fluid!
-
-See animations in real-time by running `npm run dev` and interacting with the chat interface.
+The animation system provides rich visual feedback that makes the AI interaction feel natural and engaging!

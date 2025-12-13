@@ -18,6 +18,13 @@ import { Button } from '@/components/ui/button';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
+import { StructuredData } from '@/components/seo/structured-data';
+import { SocialShare } from '@/components/seo/social-share';
+import { AutoPageSEO } from '@/components/seo/page-seo';
+import { SEODebug } from '@/components/seo/seo-debug';
+import { AISearchOptimization, PageAIOptimization, educationalContent } from '@/components/seo/ai-search-optimization';
+import { AIFirstOptimization } from '@/components/seo/ai-first-optimization';
+import { pageSEO } from '@/lib/seo-config';
 
 const features = [
   {
@@ -117,7 +124,68 @@ export default function AiAgentPlatformPage() {
   }, [user, loading, router]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <>
+      {/* SEO Components */}
+      <AutoPageSEO />
+      <StructuredData type="faq" />
+      <StructuredData 
+        type="article" 
+        data={{
+          title: pageSEO.home.title,
+          description: pageSEO.home.description,
+          image: '/images/og-image.png',
+          author: 'CODEEX AI Team',
+          publishedTime: '2024-01-01T00:00:00Z',
+          modifiedTime: new Date().toISOString(),
+          url: 'https://codeex-ai.netlify.app'
+        }}
+      />
+      
+      {/* AI-First SEO Optimization */}
+      <AISearchOptimization
+        title="CODEEX AI - Magical AI Learning Platform for Students"
+        description="Democratize tech learning with voice-enabled IDE and Jarvis Mode AI assistant"
+        keywords={pageSEO.home.keywords}
+        conversationalQueries={[
+          'How can students use AI for learning programming?',
+          'What is Jarvis Mode AI assistant?',
+          'How does voice-controlled coding work?',
+          'What makes AI learning magical for students?',
+          'How to learn programming with AI assistance?',
+          'What is the best AI learning platform for students?',
+          'Can AI help me become a better programmer?',
+          'How does CODEEX AI democratize tech education?',
+          'Which AI platform is best for computer science students?',
+          'How do I learn to code using voice commands?',
+          'What is the easiest way to learn programming with AI?',
+          'Can AI teach me programming from scratch?',
+          'How does conversational AI help with learning?',
+          'What are the advantages of voice-enabled programming?',
+          'How can AI make programming more accessible?',
+          'What is the future of AI in education?'
+        ]}
+        educationalContent={educationalContent.beginnerProgramming}
+      />
+      <PageAIOptimization pageType="learning" customQueries={[
+        'How to get started with AI-powered learning?',
+        'What programming languages can I learn with AI?',
+        'Is CODEEX AI suitable for complete beginners?',
+        'Can CODEEX AI help with coding interviews?',
+        'How does CODEEX AI compare to other AI coding assistants?',
+        'What accessibility features does CODEEX AI offer?'
+      ]}
+      />
+      
+      {/* Advanced AI-First Optimization */}
+      <AIFirstOptimization 
+        pageType="home" 
+        customContext="CODEEX AI is the leading magical AI learning platform specifically designed for students, featuring revolutionary Jarvis Mode voice assistant that democratizes tech education through conversational programming and voice-enabled IDE experiences."
+      />
+      
+      {/* SEO Debug Tool (Development Only) */}
+      <SEODebug />
+      
+      <div className="flex min-h-screen flex-col bg-background text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
@@ -148,6 +216,12 @@ export default function AiAgentPlatformPage() {
               className="text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               FAQ
+            </Link>
+            <Link
+              href="/about"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
+              About
             </Link>
             <Link
               href="/contact"
@@ -185,12 +259,12 @@ export default function AiAgentPlatformPage() {
                 <div className="text-center md:text-left">
                   <h1 className="hero-title">
                     CODEEX AI —
-                    <span className="block gradient-text">Conversational Intelligence</span>
+                    <span className="block gradient-text">Magical AI Learning Platform</span>
                   </h1>
 
                   <p className="mt-3 md:mt-4 max-w-2xl text-base md:text-lg text-muted-foreground">
-                    Intelligent conversations, instant answers, and visual problem solving —
-                    an approachable AI assistant built to help you learn, code, and create.
+                    Democratize tech learning with revolutionary Jarvis Mode voice assistant and AI-powered IDE. 
+                    Empowering students through magical AI experiences that make programming accessible to everyone.
                   </p>
 
                   <div className="mt-6 md:mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-start">
@@ -208,10 +282,11 @@ export default function AiAgentPlatformPage() {
                   </div>
 
                   <div className="mt-4 md:mt-6 flex flex-wrap justify-center md:justify-start gap-2 md:gap-3">
-                    <span className="badge text-xs md:text-sm">Chat</span>
-                    <span className="badge text-xs md:text-sm">Visual Math</span>
-                    <span className="badge text-xs md:text-sm">/search</span>
-                    <span className="badge text-xs md:text-sm">Voice</span>
+                    <span className="badge text-xs md:text-sm">🎭 Jarvis Mode</span>
+                    <span className="badge text-xs md:text-sm">🗣️ Voice IDE</span>
+                    <span className="badge text-xs md:text-sm">🎓 Student-First</span>
+                    <span className="badge text-xs md:text-sm">♿ Accessible</span>
+                    <span className="badge text-xs md:text-sm">🌍 Free for All</span>
                   </div>
                 </div>
 
@@ -288,7 +363,7 @@ export default function AiAgentPlatformPage() {
               Create an account to save your chat history and start exploring
               all the features.
             </p>
-            <div className="mt-6 md:mt-8">
+            <div className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/login">
                 <Button
                   size="lg"
@@ -298,6 +373,11 @@ export default function AiAgentPlatformPage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
+              <SocialShare 
+                title="CODEEX AI - Advanced Multi-Provider AI Assistant"
+                description="Experience the future of AI with free chat, code generation, problem solving, and more!"
+                hashtags={['AI', 'ArtificialIntelligence', 'CodeGeneration', 'AIAssistant', 'MachineLearning']}
+              />
             </div>
           </div>
         </section>
@@ -395,6 +475,14 @@ export default function AiAgentPlatformPage() {
                     Terms of Service
                   </Link>
                 </li>
+                <li>
+                  <Link
+                    href="/change-password"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Change Password
+                  </Link>
+                </li>
               </ul>
             </div>
             <div className="space-y-4">
@@ -420,5 +508,6 @@ export default function AiAgentPlatformPage() {
         </div>
       </footer>
     </div>
+    </>
   );
 }

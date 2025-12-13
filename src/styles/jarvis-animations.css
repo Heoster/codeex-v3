@@ -1,0 +1,241 @@
+/* Jarvis Animation Styles */
+
+/* Animation delays for staggered effects */
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
+/* Custom keyframes for Jarvis animations */
+@keyframes jarvis-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes jarvis-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.6);
+  }
+}
+
+@keyframes jarvis-listening {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+}
+
+@keyframes jarvis-speaking {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.6);
+  }
+}
+
+@keyframes jarvis-error {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25%, 75% {
+    transform: scale(1.05) translateX(-2px);
+  }
+  50% {
+    transform: scale(1.05) translateX(2px);
+  }
+}
+
+@keyframes jarvis-success {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes jarvis-wave {
+  0%, 100% {
+    height: 4px;
+    opacity: 0.3;
+  }
+  50% {
+    height: 24px;
+    opacity: 1;
+  }
+}
+
+@keyframes jarvis-activation {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes jarvis-deactivation {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes jarvis-ring-expand {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Utility classes for Jarvis animations */
+.jarvis-pulse {
+  animation: jarvis-pulse 2s ease-in-out infinite;
+}
+
+.jarvis-glow {
+  animation: jarvis-glow 2s ease-in-out infinite;
+}
+
+.jarvis-listening {
+  animation: jarvis-listening 1.5s ease-in-out infinite;
+}
+
+.jarvis-speaking {
+  animation: jarvis-speaking 1.5s ease-in-out infinite;
+}
+
+.jarvis-error {
+  animation: jarvis-error 0.5s ease-in-out 3;
+}
+
+.jarvis-success {
+  animation: jarvis-success 0.6s ease-in-out;
+}
+
+.jarvis-activation {
+  animation: jarvis-activation 1s ease-out;
+}
+
+.jarvis-deactivation {
+  animation: jarvis-deactivation 1s ease-in;
+}
+
+.jarvis-ring-expand {
+  animation: jarvis-ring-expand 1.5s ease-out infinite;
+}
+
+/* Sound wave animation */
+.jarvis-wave {
+  animation: jarvis-wave 0.5s ease-in-out infinite;
+}
+
+.jarvis-wave:nth-child(1) { animation-delay: 0ms; }
+.jarvis-wave:nth-child(2) { animation-delay: 100ms; }
+.jarvis-wave:nth-child(3) { animation-delay: 200ms; }
+.jarvis-wave:nth-child(4) { animation-delay: 300ms; }
+.jarvis-wave:nth-child(5) { animation-delay: 400ms; }
+.jarvis-wave:nth-child(6) { animation-delay: 300ms; }
+.jarvis-wave:nth-child(7) { animation-delay: 200ms; }
+.jarvis-wave:nth-child(8) { animation-delay: 100ms; }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .jarvis-orb {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .jarvis-orb .icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .jarvis-glow {
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .jarvis-pulse,
+  .jarvis-glow,
+  .jarvis-listening,
+  .jarvis-speaking,
+  .jarvis-wave,
+  .jarvis-ring-expand {
+    animation: none;
+  }
+  
+  .jarvis-error {
+    animation: none;
+    transform: scale(1.05);
+  }
+  
+  .jarvis-success {
+    animation: none;
+    transform: scale(1.1);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .jarvis-orb {
+    border-width: 3px;
+  }
+  
+  .jarvis-glow {
+    box-shadow: 0 0 0 3px currentColor;
+  }
+}

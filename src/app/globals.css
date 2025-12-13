@@ -417,3 +417,6 @@ html {
     font-size: 16px; /* Prevents zoom on iOS */
   }
 }
+
+/* Import Jarvis animations */
+@import '../styles/jarvis-animations.css';

@@ -36,7 +36,7 @@ export function UserManagement({ onClose }: UserManagementProps) {
 
   const menuItems: Array<{category: string; items: MenuItem[]}> = [
     {
-      category: 'Account',
+      category: 'Account Management',
       items: [
         {
           icon: User,
@@ -47,11 +47,18 @@ export function UserManagement({ onClose }: UserManagementProps) {
         },
         {
           icon: Settings,
-          title: 'App Settings',
+          title: 'App Configuration',
           description: 'Customize your AI experience',
           action: 'settings',
           badge: null
-        }
+        },
+        ...(user ? [{
+          icon: Shield,
+          title: 'Change Password',
+          description: 'Update your account password',
+          href: '/change-password',
+          badge: null
+        }] : [])
       ]
     },
     {
@@ -60,9 +67,9 @@ export function UserManagement({ onClose }: UserManagementProps) {
         {
           icon: HelpCircle,
           title: 'FAQ',
-          description: 'Frequently asked questions',
+          description: 'Frequently asked questions with categories',
           href: '/faq',
-          badge: 'New'
+          badge: '12 Q&As'
         },
         {
           icon: FileText,
@@ -77,6 +84,13 @@ export function UserManagement({ onClose }: UserManagementProps) {
           description: 'Get help from our team',
           href: '/contact',
           badge: null
+        },
+        {
+          icon: User,
+          title: 'About Developers',
+          description: 'Meet the team behind CODEEX AI',
+          href: '/about',
+          badge: null
         }
       ]
     },
@@ -86,16 +100,16 @@ export function UserManagement({ onClose }: UserManagementProps) {
         {
           icon: Shield,
           title: 'Privacy Policy',
-          description: 'How we protect your data',
+          description: 'How we protect your data and AI transparency',
           href: '/privacy',
-          badge: null
+          badge: 'Updated'
         },
         {
           icon: FileText,
           title: 'Terms of Service',
-          description: 'Terms and conditions',
+          description: 'Comprehensive terms and conditions',
           href: '/terms',
-          badge: null
+          badge: 'Legal'
         }
       ]
     },

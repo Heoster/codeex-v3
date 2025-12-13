@@ -5,7 +5,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {z} from 'zod';
 import {Textarea} from '@/components/ui/textarea';
 import {Button} from '@/components/ui/button';
-import {Send, Mic, MicOff, Square, Sparkles, Settings, Brain} from 'lucide-react';
+import {Send, Mic, Square, Sparkles, Brain} from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -17,6 +17,7 @@ import {useEffect, useRef, useState} from 'react';
 import {cn} from '@/lib/utils';
 import {JarvisMode, type JarvisConfig, type JarvisState} from '@/lib/jarvis-mode';
 import {Badge} from '@/components/ui/badge';
+import {JarvisButtonAnimation, JarvisOverlayAnimation, type JarvisAnimationState} from './jarvis-animations';
 
 const chatSchema = z.object({
   message: z.string().min(1, 'Message cannot be empty.'),
@@ -50,7 +51,7 @@ export function ChatInput({onSendMessage, isLoading, onAIResponse, onOpenMemoryM
     conversationContext: [],
     emotionalState: 'neutral'
   });
-  const [jarvisConfig, setJarvisConfig] = useState<JarvisConfig>({
+  const [jarvisConfig] = useState<JarvisConfig>({
     wakeWord: 'hey jarvis',
     language: 'en-US',
     voiceStyle: 'friendly',
@@ -62,6 +63,10 @@ export function ChatInput({onSendMessage, isLoading, onAIResponse, onOpenMemoryM
     emotionalTone: true,
     contextualAwareness: true
   });
+
+  // Animation states
+  const [showActivationOverlay, setShowActivationOverlay] = useState(false);
+  const [overlayState, setOverlayState] = useState<'activating' | 'deactivating'>('activating');
 
   // Legacy voice chat state (for backward compatibility)
   const [isVoiceChatActive, setIsVoiceChatActive] = useState(false);
@@ -204,14 +209,31 @@ export function ChatInput({onSendMessage, isLoading, onAIResponse, onOpenMemoryM
     }
   }, [isVoiceChatActive, isLoading, isListening]);
 
+  // Get current animation state
+  const getJarvisAnimationState = (): JarvisAnimationState => {
+    if (!jarvisState.isActive) return 'idle';
+    if (jarvisState.isListening) return 'listening';
+    if (jarvisState.isSpeaking) return 'speaking';
+    if (jarvisState.isProcessing) return 'processing';
+    return 'idle';
+  };
+
   // Jarvis Mode controls
   const toggleJarvisMode = () => {
     if (!jarvisMode) return;
     
     if (jarvisState.isActive) {
-      jarvisMode.deactivate();
+      setOverlayState('deactivating');
+      setShowActivationOverlay(true);
+      setTimeout(() => {
+        jarvisMode.deactivate();
+      }, 500);
     } else {
-      jarvisMode.activate();
+      setOverlayState('activating');
+      setShowActivationOverlay(true);
+      setTimeout(() => {
+        jarvisMode.activate();
+      }, 500);
     }
   };
 
@@ -315,14 +337,17 @@ export function ChatInput({onSendMessage, isLoading, onAIResponse, onOpenMemoryM
                           size="icon"
                           variant={jarvisState.isActive ? 'default' : 'ghost'}
                           className={cn(
-                            'h-9 w-9 rounded-xl transition-all',
-                            jarvisState.isActive && 'bg-purple-600 hover:bg-purple-700 text-white',
-                            jarvisState.isListening && 'animate-pulse scale-110'
+                            'h-9 w-9 rounded-xl transition-all relative overflow-hidden',
+                            jarvisState.isActive && 'bg-purple-600 hover:bg-purple-700 text-white'
                           )}
                           onClick={toggleJarvisMode}
                           title={jarvisState.isActive ? 'Deactivate Jarvis Mode' : 'Activate Jarvis Mode'}
                         >
-                          <Sparkles className="h-4 w-4" />
+                          <JarvisButtonAnimation 
+                            state={getJarvisAnimationState()} 
+                            size="md"
+                            className="absolute inset-0"
+                          />
                           <span className="sr-only">
                             {jarvisState.isActive ? 'Deactivate Jarvis' : 'Activate Jarvis'}
                           </span>
@@ -334,7 +359,10 @@ export function ChatInput({onSendMessage, isLoading, onAIResponse, onOpenMemoryM
                             type="button"
                             size="icon"
                             variant={jarvisState.isListening ? 'destructive' : 'ghost'}
-                            className="h-9 w-9 rounded-xl transition-all"
+                            className={cn(
+                              'h-9 w-9 rounded-xl transition-all relative overflow-hidden',
+                              jarvisState.isListening && 'bg-red-600 hover:bg-red-700 text-white'
+                            )}
                             onClick={jarvisState.isListening ? stopJarvisListening : startJarvisListening}
                             disabled={jarvisState.isSpeaking}
                             title={jarvisState.isListening ? 'Stop Listening' : 'Start Listening'}
@@ -391,6 +419,13 @@ export function ChatInput({onSendMessage, isLoading, onAIResponse, onOpenMemoryM
           )}
         />
       </form>
+
+      {/* Jarvis Activation/Deactivation Overlay */}
+      <JarvisOverlayAnimation
+        isVisible={showActivationOverlay}
+        state={overlayState}
+        onComplete={() => setShowActivationOverlay(false)}
+      />
     </Form>
   );
 }
