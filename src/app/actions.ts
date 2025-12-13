@@ -1,7 +1,6 @@
 'use server';
 
 import {analyzePdf} from '@/ai/flows/analyze-pdf';
-import {processUserMessage} from '@/ai/flows/process-user-message';
 import {sendWelcomeEmail} from '@/ai/flows/send-welcome-email';
 import {solveImageEquation} from '@/ai/flows/solve-image-equation';
 import {enhancedImageSolver} from '@/ai/flows/enhanced-image-solver';
@@ -28,47 +27,101 @@ function handleGenkitError(error: unknown): {error: string} {
   return {error: `AI processing failed: ${message}`};
 }
 
-// Type guard to check if response has error property
-function isErrorResponse(response: any): response is {error: string} {
-  return response && typeof response === 'object' && 'error' in response && typeof response.error === 'string';
-}
 
-// Type guard to ensure response is valid
-function isValidResponse(response: any): boolean {
-  return response && typeof response === 'object' && response !== null;
-}
 
 export async function generateResponse(
   input: ProcessUserMessageInput
 ): Promise<{content: string; modelUsed?: string; autoRouted?: boolean; routingReasoning?: string} | {error: string}> {
   try {
-    // Use our working direct chat API instead of the problematic Genkit flow
-    const response = await fetch('http://localhost:3000/api/chat-direct', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: input.message,
-        history: input.history,
-        settings: input.settings
-      })
+    // Import and use the smart fallback directly instead of making HTTP calls
+    // This avoids the localhost URL issue and is more efficient
+    const { generateWithSmartFallback } = await import('@/ai/smart-fallback');
+    
+    // Build system prompt based on settings
+    const getToneInstructions = (tone: string) => {
+      switch (tone) {
+        case 'formal':
+          return 'Use professional language, proper grammar, and a respectful tone. Avoid contractions and casual expressions.';
+        case 'casual':
+          return 'Be friendly and conversational. Use simple language, contractions are fine, and feel free to use appropriate emojis occasionally.';
+        default:
+          return 'Be warm, approachable, and supportive. Balance professionalism with friendliness.';
+      }
+    };
+
+    const getTechnicalInstructions = (level: string) => {
+      switch (level) {
+        case 'beginner':
+          return 'Explain concepts in simple terms. Avoid jargon, use analogies, and break down complex ideas into easy steps. Assume no prior knowledge.';
+        case 'expert':
+          return 'Use technical terminology freely. Provide in-depth explanations, include advanced concepts, and assume strong foundational knowledge.';
+        default:
+          return 'Balance technical accuracy with accessibility. Define specialized terms when first used and provide moderate detail.';
+      }
+    };
+
+    const systemPrompt = `You are CODEEX AI, an intelligent and versatile assistant created by Heoster. You excel at helping users with coding, problem-solving, learning, and general questions.
+
+## Your Personality & Communication Style
+${getToneInstructions(input.settings.tone)}
+
+## Technical Depth
+${getTechnicalInstructions(input.settings.technicalLevel)}
+
+## Core Capabilities
+- **Coding Help**: Debug code, explain concepts, suggest best practices, and help with algorithms
+- **Problem Solving**: Break down complex problems, provide step-by-step solutions
+- **Learning**: Explain topics clearly, provide examples, and adapt to the user's level
+- **General Knowledge**: Answer questions accurately and cite limitations when uncertain
+
+## Response Guidelines
+1. **Be Accurate**: If unsure, say so. Don't make up information.
+2. **Be Concise**: Get to the point, but provide enough detail to be helpful.
+3. **Use Formatting**: Use markdown for code blocks, lists, and emphasis when helpful.
+4. **Stay Focused**: Address the user's actual question, not tangential topics.
+5. **Be Proactive**: Anticipate follow-up questions and address them when relevant.
+
+## Special Instructions
+- For code: Always specify the language in code blocks, explain key parts, and mention potential edge cases.
+- For math: Show your work step-by-step when solving problems.
+- For errors: Explain what went wrong and how to fix it.
+- Remember context from the conversation to provide coherent, continuous assistance.`;
+
+    // Convert history to the format expected by smart fallback
+    const convertedHistory = input.history.map((msg: any) => ({
+      role: (msg.role === 'assistant' ? 'model' : 'user') as 'user' | 'model' | 'assistant',
+      content: msg.content
+    }));
+
+    // Determine preferred model
+    let preferredModelId: string | undefined;
+    if (input.settings.model && input.settings.model !== 'auto') {
+      preferredModelId = input.settings.model;
+    }
+
+    // Use smart fallback system directly
+    const result = await generateWithSmartFallback({
+      prompt: input.message,
+      systemPrompt,
+      history: convertedHistory,
+      preferredModelId,
+      category: 'general',
+      params: {
+        temperature: 0.7,
+        topP: 0.9,
+        topK: 40,
+        maxOutputTokens: 4096,
+      },
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.error) {
-      return { error: data.error };
-    }
-    
     return {
-      content: data.content || 'No response generated',
-      modelUsed: data.modelUsed,
-      autoRouted: data.autoRouted,
-      routingReasoning: data.routingReasoning,
+      content: result.response.text,
+      modelUsed: result.modelUsed,
+      autoRouted: result.fallbackTriggered,
+      routingReasoning: result.fallbackTriggered ? 'Fallback triggered' : 'Direct model usage'
     };
+
+
   } catch (error) {
     console.error('generateResponse error:', error);
     return handleGenkitError(error);
