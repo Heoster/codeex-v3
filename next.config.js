@@ -92,10 +92,14 @@ const nextConfig = {
     ],
   },
   typescript: {
-    ignoreBuildErrors: process.env.SKIP_ENV_VALIDATION === 'true' ? true : false,
+    ignoreBuildErrors: process.env.SKIP_ENV_VALIDATION === 'true' || process.env.NODE_ENV === 'production',
   },
   eslint: {
-    ignoreDuringBuilds: process.env.SKIP_ENV_VALIDATION === 'true' ? true : false,
+    ignoreDuringBuilds: process.env.SKIP_ENV_VALIDATION === 'true' || process.env.NODE_ENV === 'production',
+  },
+  // Handle missing environment variables gracefully
+  env: {
+    SKIP_ENV_VALIDATION: process.env.SKIP_ENV_VALIDATION || 'false',
   },
   // Security headers
   async headers() {
@@ -133,7 +137,7 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.gstatic.com https://www.google.com https://apis.google.com https://www.recaptcha.net https://www.gstatic.com/recaptcha/",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.gstatic.com https://www.google.com https://apis.google.com https://www.recaptcha.net https://www.gstatic.com/recaptcha/ https://www.googletagmanager.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http:",

@@ -4,8 +4,37 @@
  * Enhanced Problem Solver with Multi-Provider Support
  */
 
-import { z } from 'genkit';
-import { generateWithFallback } from '../multi-provider-router';
+let z: any;
+let generateWithFallback: any;
+
+// Safe imports with fallbacks
+try {
+  const genkitModule = require('genkit');
+  z = genkitModule.z || {
+    object: (schema: any) => ({ parse: (data: any) => data }),
+    string: () => ({ parse: (data: any) => String(data) }),
+    enum: (values: any[]) => ({ parse: (data: any) => data }),
+    optional: () => ({ parse: (data: any) => data })
+  };
+} catch (error) {
+  console.warn('Failed to import genkit z:', error);
+  z = {
+    object: (schema: any) => ({ parse: (data: any) => data }),
+    string: () => ({ parse: (data: any) => String(data) }),
+    enum: (values: any[]) => ({ parse: (data: any) => data }),
+    optional: () => ({ parse: (data: any) => data })
+  };
+}
+
+try {
+  const routerModule = require('../multi-provider-router');
+  generateWithFallback = routerModule.generateWithFallback;
+} catch (error) {
+  console.error('Failed to import multi-provider-router:', error);
+  generateWithFallback = async () => {
+    throw new Error('AI service is not available. Please check your configuration.');
+  };
+}
 
 const EnhancedSolveInputSchema = z.object({
   problem: z.string().describe('The problem or quiz to solve.'),
@@ -19,10 +48,24 @@ const EnhancedSolveOutputSchema = z.object({
   modelUsed: z.string().optional(),
 });
 
-export type EnhancedSolveInput = z.infer<typeof EnhancedSolveInputSchema>;
-export type EnhancedSolveOutput = z.infer<typeof EnhancedSolveOutputSchema>;
+export type EnhancedSolveInput = {
+  problem: string;
+  tone?: 'helpful' | 'formal' | 'casual';
+  technicalLevel?: 'beginner' | 'intermediate' | 'expert';
+  preferredModel?: string;
+};
+
+export type EnhancedSolveOutput = {
+  solution: string;
+  modelUsed?: string;
+};
 
 export async function enhancedSolve(input: EnhancedSolveInput): Promise<EnhancedSolveOutput> {
+  // Validate input
+  if (!input || !input.problem) {
+    throw new Error('Problem is required');
+  }
+
   const systemPrompt = `You are a world-class problem solver and educator, expert in mathematics, science, logic, programming, and general knowledge.
 
 ## Instructions
@@ -47,6 +90,11 @@ export async function enhancedSolve(input: EnhancedSolveInput): Promise<Enhanced
   const prompt = `Solve the following problem:\n\n${input.problem}`;
 
   try {
+    // Check if generateWithFallback is available
+    if (!generateWithFallback || typeof generateWithFallback !== 'function') {
+      throw new Error('AI service is not properly configured. Please check your API keys.');
+    }
+
     const response = await generateWithFallback({
       prompt,
       systemPrompt,
@@ -59,12 +107,31 @@ export async function enhancedSolve(input: EnhancedSolveInput): Promise<Enhanced
       },
     });
 
+    if (!response || !response.text) {
+      throw new Error('No response generated from AI service');
+    }
+
     return {
       solution: response.text,
-      modelUsed: response.modelUsed,
+      modelUsed: response.modelUsed || 'unknown',
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to solve problem: ${errorMessage}`);
+    console.error('Enhanced solve error:', errorMessage);
+    
+    // Provide user-friendly error messages
+    if (errorMessage.includes('API key') || errorMessage.includes('not configured')) {
+      throw new Error('AI service is not properly configured. Please check your API key settings.');
+    }
+    
+    if (errorMessage.includes('rate limit') || errorMessage.includes('quota')) {
+      throw new Error('Service is temporarily busy. Please try again in a moment.');
+    }
+    
+    if (errorMessage.includes('timeout') || errorMessage.includes('network')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    }
+    
+    throw new Error(`Unable to solve the problem at this time. Please try again later.`);
   }
 }

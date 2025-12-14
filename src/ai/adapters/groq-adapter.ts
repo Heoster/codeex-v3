@@ -31,17 +31,28 @@ export class GroqAdapter extends BaseProviderAdapter {
   readonly provider = 'groq' as const;
   
   isAvailable(): boolean {
-    return !!process.env.GROQ_API_KEY;
+    try {
+      return !!process.env.GROQ_API_KEY;
+    } catch (error) {
+      console.warn('Failed to check Groq API key availability:', error);
+      return false;
+    }
   }
   
   async generate(request: GenerateRequest): Promise<GenerateResponse> {
     const { model, prompt, systemPrompt, history, params } = request;
     const mergedParams = this.mergeParams(model, params);
     
-    const apiKey = process.env.GROQ_API_KEY;
+    let apiKey: string | undefined;
+    try {
+      apiKey = process.env.GROQ_API_KEY;
+    } catch (error) {
+      console.error('Failed to access GROQ_API_KEY:', error);
+    }
+    
     if (!apiKey) {
       throw createUserFriendlyError(
-        new Error('GROQ_API_KEY not configured'),
+        new Error('GROQ_API_KEY not configured or accessible'),
         'groq',
         model.id
       );

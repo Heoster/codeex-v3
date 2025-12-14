@@ -1,388 +1,165 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Send, Mail, CheckCircle, AlertCircle, Loader2, Zap } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, XCircle, Mail, Send, Loader2, AlertCircle, Globe, Shield } from 'lucide-react';
-
-interface EmailResult {
-  success: boolean;
-  id?: string;
-  error?: string;
-}
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function ResendEmailTest() {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<EmailResult | null>(null);
-  const [testEmail, setTestEmail] = useState('codeex.care@gmail.com');
-  const [testName, setTestName] = useState('Test User');
-  
-  // Contact form state
-  const [contactName, setContactName] = useState('John Doe');
-  const [contactEmail, setContactEmail] = useState('john@example.com');
-  const [contactMessage, setContactMessage] = useState('This is a test message from the Resend email service integration.');
-  
-  // Custom email state
-  const [customTo, setCustomTo] = useState('codeex.care@gmail.com');
-  const [customSubject, setCustomSubject] = useState('Custom Test Email from CODEEX AI');
-  const [customHtml, setCustomHtml] = useState(`
-    <h1>🚀 Custom Email Test</h1>
-    <p>This is a custom email sent using the Resend API integration.</p>
-    <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
-  `);
-  const [customText, setCustomText] = useState('Custom Email Test\n\nThis is a custom email sent using the Resend API integration.\n\nTimestamp: ' + new Date().toISOString());
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<{ success: boolean; message: string; id?: string } | null>(null);
+  const [recipientEmail, setRecipientEmail] = useState('codeex.care@gmail.com');
+  const [recipientName, setRecipientName] = useState('Test User');
 
-  const sendTestEmail = async (type: string, params: any) => {
-    setLoading(true);
+  const sendTestEmail = async () => {
+    setIsLoading(true);
     setResult(null);
 
     try {
+      console.log('📧 Sending test email via Resend API...');
+      
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ type, ...params }),
+        body: JSON.stringify({
+          type: 'test',
+          recipientEmail,
+          recipientName,
+        }),
       });
 
       const data = await response.json();
-      setResult(data);
-    } catch (error) {
+      
+      console.log('📨 Response:', data);
+      
+      if (data.success) {
+        setResult({
+          success: true,
+          message: `Email sent successfully to ${recipientEmail}!`,
+          id: data.id
+        });
+      } else {
+        setResult({
+          success: false,
+          message: data.error || 'Failed to send email'
+        });
+      }
+    } catch (error: any) {
+      console.error('❌ Failed to send email:', error);
       setResult({
         success: false,
-        error: error instanceof Error ? error.message : 'Network error occurred'
+        message: `Network error: ${error.message}`
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleTestEmail = () => {
-    sendTestEmail('test', {
-      recipientEmail: testEmail,
-      recipientName: testName
-    });
-  };
-
-  const handleContactEmail = () => {
-    sendTestEmail('contact', {
-      name: contactName,
-      email: contactEmail,
-      message: contactMessage
-    });
-  };
-
-  const handleCustomEmail = () => {
-    sendTestEmail('custom', {
-      to: customTo,
-      subject: customSubject,
-      html: customHtml,
-      text: customText
-    });
-  };
-
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold flex items-center justify-center gap-2">
-          <Mail className="h-8 w-8 text-blue-600" />
-          Resend Email Service Test
-        </h1>
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Zap className="h-8 w-8 text-primary" />
+        </div>
+        <h1 className="text-2xl font-bold mb-2">Resend Email Test</h1>
         <p className="text-muted-foreground">
-          Test the Resend email integration with different email types
+          Test the new Resend API email service (reliable & fast)
         </p>
       </div>
 
-      {/* Status Alert */}
-      {result && (
-        <Alert className={result.success ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'}>
-          {result.success ? (
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          ) : (
-            <XCircle className="h-4 w-4 text-red-600" />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            Send Test Email
+          </CardTitle>
+          <CardDescription>
+            Test email delivery using the Resend API service
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="recipientEmail">Recipient Email</Label>
+            <Input
+              id="recipientEmail"
+              type="email"
+              value={recipientEmail}
+              onChange={(e) => setRecipientEmail(e.target.value)}
+              placeholder="recipient@example.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="recipientName">Recipient Name</Label>
+            <Input
+              id="recipientName"
+              type="text"
+              value={recipientName}
+              onChange={(e) => setRecipientName(e.target.value)}
+              placeholder="Test User"
+            />
+          </div>
+
+          <div className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+            <p><strong>Service:</strong> Resend API</p>
+            <p><strong>Method:</strong> Server-side (reliable)</p>
+            <p><strong>Features:</strong> HTML emails, delivery tracking</p>
+            <p><strong>Status:</strong> Production ready</p>
+          </div>
+
+          {result && (
+            <Alert variant={result.success ? 'default' : 'destructive'}>
+              {result.success ? (
+                <CheckCircle className="h-4 w-4" />
+              ) : (
+                <AlertCircle className="h-4 w-4" />
+              )}
+              <AlertDescription>
+                {result.message}
+                {result.id && (
+                  <div className="mt-1 text-xs opacity-75">
+                    Email ID: {result.id}
+                  </div>
+                )}
+              </AlertDescription>
+            </Alert>
           )}
-          <AlertDescription className={result.success ? 'text-green-800' : 'text-red-800'}>
-            {result.success ? (
+
+          <Button
+            onClick={sendTestEmail}
+            className="w-full"
+            disabled={isLoading || !recipientEmail}
+          >
+            {isLoading ? (
               <>
-                ✅ Email sent successfully! 
-                {result.id && <span className="ml-2 font-mono text-sm">ID: {result.id}</span>}
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending via Resend...
               </>
             ) : (
-              <>❌ Failed to send email: {result.error}</>
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <Tabs defaultValue="test" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="test">Test Email</TabsTrigger>
-          <TabsTrigger value="contact">Contact Form</TabsTrigger>
-          <TabsTrigger value="custom">Custom Email</TabsTrigger>
-        </TabsList>
-
-        {/* Test Email Tab */}
-        <TabsContent value="test">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Send className="h-5 w-5" />
+              <>
+                <Send className="mr-2 h-4 w-4" />
                 Send Test Email
-              </CardTitle>
-              <CardDescription>
-                Send a comprehensive test email with CODEEX AI features overview
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="test-email">Recipient Email</Label>
-                  <Input
-                    id="test-email"
-                    type="email"
-                    value={testEmail}
-                    onChange={(e) => setTestEmail(e.target.value)}
-                    placeholder="recipient@example.com"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="test-name">Recipient Name</Label>
-                  <Input
-                    id="test-name"
-                    value={testName}
-                    onChange={(e) => setTestName(e.target.value)}
-                    placeholder="Test User"
-                  />
-                </div>
-              </div>
-              
-              <div className="bg-muted p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">Email Preview:</h4>
-                <p className="text-sm text-muted-foreground">
-                  Subject: CODEEX AI - Email Service Test (Resend API)<br/>
-                  Content: Comprehensive platform overview with features, models, and links
-                </p>
-              </div>
+              </>
+            )}
+          </Button>
 
-              <Button 
-                onClick={handleTestEmail} 
-                disabled={loading || !testEmail}
-                className="w-full"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending Test Email...
-                  </>
-                ) : (
-                  <>
-                    <Send className="mr-2 h-4 w-4" />
-                    Send Test Email
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <div className="text-xs text-muted-foreground text-center space-y-1">
+            <p>✅ Server-side email delivery</p>
+            <p>⚡ Fast & reliable with Resend API</p>
+            <p>📧 Professional HTML templates</p>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Contact Form Tab */}
-        <TabsContent value="contact">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                Contact Form Email
-              </CardTitle>
-              <CardDescription>
-                Test the contact form email functionality
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="contact-name">Name</Label>
-                  <Input
-                    id="contact-name"
-                    value={contactName}
-                    onChange={(e) => setContactName(e.target.value)}
-                    placeholder="Your name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="contact-email">Email</Label>
-                  <Input
-                    id="contact-email"
-                    type="email"
-                    value={contactEmail}
-                    onChange={(e) => setContactEmail(e.target.value)}
-                    placeholder="your@email.com"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="contact-message">Message</Label>
-                <Textarea
-                  id="contact-message"
-                  value={contactMessage}
-                  onChange={(e) => setContactMessage(e.target.value)}
-                  placeholder="Your message..."
-                  rows={4}
-                />
-              </div>
-
-              <div className="bg-muted p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">Email Preview:</h4>
-                <p className="text-sm text-muted-foreground">
-                  To: codeex.care@gmail.com<br/>
-                  Subject: Contact Form - {contactName} | CODEEX AI<br/>
-                  Content: Formatted contact form submission with user details
-                </p>
-              </div>
-
-              <Button 
-                onClick={handleContactEmail} 
-                disabled={loading || !contactName || !contactEmail || !contactMessage}
-                className="w-full"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending Contact Email...
-                  </>
-                ) : (
-                  <>
-                    <Send className="mr-2 h-4 w-4" />
-                    Send Contact Email
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Custom Email Tab */}
-        <TabsContent value="custom">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5" />
-                Custom Email
-              </CardTitle>
-              <CardDescription>
-                Send a custom email with your own content
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="custom-to">To Email</Label>
-                  <Input
-                    id="custom-to"
-                    type="email"
-                    value={customTo}
-                    onChange={(e) => setCustomTo(e.target.value)}
-                    placeholder="recipient@example.com"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="custom-subject">Subject</Label>
-                  <Input
-                    id="custom-subject"
-                    value={customSubject}
-                    onChange={(e) => setCustomSubject(e.target.value)}
-                    placeholder="Email subject"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="custom-html">HTML Content</Label>
-                <Textarea
-                  id="custom-html"
-                  value={customHtml}
-                  onChange={(e) => setCustomHtml(e.target.value)}
-                  placeholder="HTML email content..."
-                  rows={6}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="custom-text">Text Content (Fallback)</Label>
-                <Textarea
-                  id="custom-text"
-                  value={customText}
-                  onChange={(e) => setCustomText(e.target.value)}
-                  placeholder="Plain text email content..."
-                  rows={4}
-                />
-              </div>
-
-              <Button 
-                onClick={handleCustomEmail} 
-                disabled={loading || !customTo || !customSubject || (!customHtml && !customText)}
-                className="w-full"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending Custom Email...
-                  </>
-                ) : (
-                  <>
-                    <Send className="mr-2 h-4 w-4" />
-                    Send Custom Email
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Information Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">📧 Resend Service</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <p><strong>Domain:</strong> send.codeex-ai</p>
-              <p><strong>From Address:</strong> CODEEX AI &lt;noreply@send.codeex-ai&gt;</p>
-              <p><strong>DNS Records:</strong> Configured as provided</p>
-              <div className="flex gap-2 mt-3">
-                <Badge variant="secondary">DKIM</Badge>
-                <Badge variant="secondary">SPF</Badge>
-                <Badge variant="secondary">DMARC</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">🔧 Configuration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <p><strong>API Key:</strong> RESEND_API_KEY</p>
-              <p><strong>Environment:</strong> {process.env.NODE_ENV}</p>
-              <p><strong>Endpoint:</strong> /api/send-email</p>
-              <div className="flex gap-2 mt-3">
-                <Badge variant="outline">Test</Badge>
-                <Badge variant="outline">Contact</Badge>
-                <Badge variant="outline">Custom</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="mt-6 text-center">
+        <Button variant="outline" asChild>
+          <a href="/">Back to Home</a>
+        </Button>
       </div>
     </div>
   );

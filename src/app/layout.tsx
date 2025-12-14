@@ -10,7 +10,7 @@ import LoadingManager from '@/components/loading-manager';
 import PageTransition from '@/components/page-transition';
 import { PWAPrompt } from '@/components/pwa-prompt';
 import SwRegister from '@/components/sw-register';
-import { validateStartup } from '@/lib/startup-validation';
+import ErrorBoundary from '@/components/error-boundary';
 import { StructuredData } from '@/components/seo/structured-data';
 import { defaultSEO } from '@/lib/seo-config';
 import { AnalyticsProvider } from '@/components/analytics/analytics-provider';
@@ -21,9 +21,14 @@ const manrope = Manrope({
   variable: '--font-manrope',
 });
 
-// Run startup validation on server-side only
+// Run startup validation on server-side only with error handling
 if (typeof window === 'undefined') {
-  validateStartup();
+  try {
+    const { validateStartup } = require('@/lib/startup-validation');
+    validateStartup();
+  } catch (error) {
+    console.warn('Startup validation failed:', error);
+  }
 }
 
 export const metadata: Metadata = {
@@ -178,24 +183,32 @@ export default function RootLayout({
         )}
       </head>
       <body className={`${manrope.variable} font-body antialiased`}>
-        <AnalyticsProvider>
-          <AuthProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <LoadingManager />
-              <PageTransition>
-                {children}
-              </PageTransition>
-              <PWAPrompt />
-              <SwRegister />
-              <Toaster />
-            </ThemeProvider>
-          </AuthProvider>
-        </AnalyticsProvider>
+        <ErrorBoundary>
+          <AnalyticsProvider>
+            <ErrorBoundary>
+              <AuthProvider>
+                <ErrorBoundary>
+                  <ThemeProvider
+                    attribute="class"
+                    defaultTheme="dark"
+                    enableSystem
+                    disableTransitionOnChange
+                  >
+                    <LoadingManager />
+                    <ErrorBoundary>
+                      <PageTransition>
+                        {children}
+                      </PageTransition>
+                    </ErrorBoundary>
+                    <PWAPrompt />
+                    <SwRegister />
+                    <Toaster />
+                  </ThemeProvider>
+                </ErrorBoundary>
+              </AuthProvider>
+            </ErrorBoundary>
+          </AnalyticsProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

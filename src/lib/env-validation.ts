@@ -19,10 +19,20 @@ export function validateAIProviderEnv(): EnvValidationResult {
     warnings: []
   };
 
-  // Check for at least one AI provider API key
-  const groqKey = process.env.GROQ_API_KEY;
-  const googleKey = process.env.GOOGLE_API_KEY;
-  const hfKey = process.env.HUGGINGFACE_API_KEY;
+  // Safe environment variable access
+  let groqKey: string | undefined;
+  let googleKey: string | undefined;
+  let hfKey: string | undefined;
+  
+  try {
+    groqKey = process.env.GROQ_API_KEY;
+    googleKey = process.env.GOOGLE_API_KEY;
+    hfKey = process.env.HUGGINGFACE_API_KEY;
+  } catch (error) {
+    console.warn('Failed to access environment variables:', error);
+    result.warnings.push('Environment variable access failed - some features may not work');
+    return result;
+  }
 
   if (!groqKey && !googleKey && !hfKey) {
     result.isValid = false;
@@ -59,11 +69,16 @@ export function validateFirebaseEnv(): EnvValidationResult {
     'NEXT_PUBLIC_FIREBASE_PROJECT_ID'
   ];
 
-  for (const varName of requiredFirebaseVars) {
-    if (!process.env[varName]) {
-      result.isValid = false;
-      result.missingVars.push(varName);
+  try {
+    for (const varName of requiredFirebaseVars) {
+      if (!process.env[varName]) {
+        result.isValid = false;
+        result.missingVars.push(varName);
+      }
     }
+  } catch (error) {
+    console.warn('Failed to validate Firebase environment:', error);
+    result.warnings.push('Firebase environment validation failed');
   }
 
   return result;
@@ -100,8 +115,9 @@ export function getSetupInstructions(): string {
 export function logEnvValidation(): void {
   if (typeof window !== 'undefined') return;
 
-  const aiValidation = validateAIProviderEnv();
-  const firebaseValidation = validateFirebaseEnv();
+  try {
+    const aiValidation = validateAIProviderEnv();
+    const firebaseValidation = validateFirebaseEnv();
 
   if (!aiValidation.isValid) {
     console.error('❌ Missing required AI provider configuration:');
@@ -120,7 +136,10 @@ export function logEnvValidation(): void {
     aiValidation.warnings.forEach(w => console.warn(`   - ${w}`));
   }
 
-  if (aiValidation.isValid && firebaseValidation.isValid) {
-    console.log('✅ Environment configuration looks good!');
+    if (aiValidation.isValid && firebaseValidation.isValid) {
+      console.log('✅ Environment configuration looks good!');
+    }
+  } catch (error) {
+    console.error('Environment validation failed:', error);
   }
 }

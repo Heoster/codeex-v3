@@ -15,7 +15,16 @@ interface ValidationResult {
  * Validate Groq API key
  */
 export function validateGroqKey(): { valid: boolean; message?: string } {
-  const apiKey = process.env.GROQ_API_KEY;
+  let apiKey: string | undefined;
+  
+  try {
+    apiKey = process.env.GROQ_API_KEY;
+  } catch (error) {
+    return {
+      valid: false,
+      message: 'Failed to access GROQ_API_KEY environment variable',
+    };
+  }
   
   if (!apiKey) {
     return {
@@ -45,7 +54,16 @@ export function validateGroqKey(): { valid: boolean; message?: string } {
  * Validate Hugging Face API key
  */
 export function validateHuggingFaceKey(): { valid: boolean; message?: string } {
-  const apiKey = process.env.HUGGINGFACE_API_KEY;
+  let apiKey: string | undefined;
+  
+  try {
+    apiKey = process.env.HUGGINGFACE_API_KEY;
+  } catch (error) {
+    return {
+      valid: false,
+      message: 'Failed to access HUGGINGFACE_API_KEY environment variable',
+    };
+  }
   
   if (!apiKey) {
     return {
@@ -75,7 +93,16 @@ export function validateHuggingFaceKey(): { valid: boolean; message?: string } {
  * Validate Google API key
  */
 export function validateGoogleKey(): { valid: boolean; message?: string } {
-  const apiKey = process.env.GOOGLE_API_KEY;
+  let apiKey: string | undefined;
+  
+  try {
+    apiKey = process.env.GOOGLE_API_KEY;
+  } catch (error) {
+    return {
+      valid: false,
+      message: 'Failed to access GOOGLE_API_KEY environment variable',
+    };
+  }
   
   if (!apiKey) {
     return {
@@ -114,7 +141,16 @@ export function validateFirebaseConfig(): { valid: boolean; message?: string } {
     'NEXT_PUBLIC_FIREBASE_APP_ID',
   ];
   
-  const missing = requiredVars.filter(varName => !process.env[varName]);
+  let missing: string[] = [];
+  
+  try {
+    missing = requiredVars.filter(varName => !process.env[varName]);
+  } catch (error) {
+    return {
+      valid: false,
+      message: 'Failed to access Firebase environment variables',
+    };
+  }
   
   if (missing.length > 0) {
     return {
@@ -130,8 +166,18 @@ export function validateFirebaseConfig(): { valid: boolean; message?: string } {
  * Validate EmailJS configuration (optional)
  */
 export function validateEmailJSConfig(): { valid: boolean; message?: string } {
-  const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
-  const userId = process.env.NEXT_PUBLIC_EMAILJS_USER_ID;
+  let serviceId: string | undefined;
+  let userId: string | undefined;
+  
+  try {
+    serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+    userId = process.env.NEXT_PUBLIC_EMAILJS_USER_ID;
+  } catch (error) {
+    return {
+      valid: false,
+      message: 'Failed to access EmailJS environment variables',
+    };
+  }
   
   if (!serviceId || !userId) {
     return {
@@ -150,9 +196,10 @@ export function validateStartup(): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
   
-  // Environment variable validation
-  const aiValidation = validateAIProviderEnv();
-  const firebaseEnvValidation = validateFirebaseEnv();
+  try {
+    // Environment variable validation
+    const aiValidation = validateAIProviderEnv();
+    const firebaseEnvValidation = validateFirebaseEnv();
   
   if (!aiValidation.isValid) {
     errors.push(...aiValidation.missingVars.map(v => `❌ ${v}`));
@@ -216,15 +263,23 @@ export function validateStartup(): ValidationResult {
     console.warn('\n');
   }
   
-  if (errors.length === 0 && warnings.length === 0) {
-    console.log('\n✅ All startup validations passed!\n');
+    if (errors.length === 0 && warnings.length === 0) {
+      console.log('\n✅ All startup validations passed!\n');
+    }
+    
+    return {
+      valid: errors.length === 0,
+      errors,
+      warnings,
+    };
+  } catch (error) {
+    console.error('Startup validation failed:', error);
+    return {
+      valid: false,
+      errors: ['Startup validation system failed'],
+      warnings: ['Some validations could not be performed'],
+    };
   }
-  
-  return {
-    valid: errors.length === 0,
-    errors,
-    warnings,
-  };
 }
 
 /**
