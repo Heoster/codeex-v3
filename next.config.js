@@ -138,7 +138,7 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https: http:",
               "media-src 'self' blob:",
-              "connect-src 'self' https://api.groq.com https://router.huggingface.co https://generativelanguage.googleapis.com https://duckduckgo.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com https://firebaseinstallations.googleapis.com wss:",
+              "connect-src 'self' https://api.groq.com https://router.huggingface.co https://generativelanguage.googleapis.com https://duckduckgo.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com https://firebaseinstallations.googleapis.com https://api.emailjs.com wss:",
               "worker-src 'self' blob:",
               "child-src 'self' blob:",
               "frame-src 'self' https://www.google.com https://www.recaptcha.net https://recaptcha.google.com",

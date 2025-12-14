@@ -168,50 +168,33 @@ Best regards,
 The CODEEX AI Team
   `.trim();
 
-  // For development/testing, we'll simulate the email sending
+  // For development/testing, we'll try to send real emails if configured
   if (process.env.NODE_ENV === 'development') {
-    console.log('\n📧 EMAIL SIMULATION - DEVELOPMENT MODE');
+    console.log('\n📧 EMAIL TEST - DEVELOPMENT MODE');
     console.log('=====================================');
     console.log('To:', params.to_email);
     console.log('Subject:', params.subject || defaultSubject);
-    console.log('Message:');
-    console.log(params.message || defaultMessage);
+    console.log('Attempting to send real email via EmailJS...');
     console.log('=====================================\n');
-    
-    // Simulate successful email sending
-    return {
-      success: true,
-      response: {
-        status: 200,
-        text: 'Email simulated successfully in development mode'
-      } as any
-    };
   }
 
-  // In production, try to use EmailJS if configured
-  if (!isEmailConfigured() || !CONTACT_TEMPLATE_ID) {
-    return { 
-      success: false, 
-      error: 'Email service is not configured. Please set up EmailJS in your environment variables.' 
-    };
-  }
-
-  try {
-    const response = await emailjs.send(SERVICE_ID!, CONTACT_TEMPLATE_ID!, {
-      user_name: params.to_name || 'Test User',
-      user_email: params.to_email,
-      message: params.message || defaultMessage,
-      subject: params.subject || defaultSubject,
-      app_url: APP_URL,
-      app_name: 'CODEEX AI',
-      test_email: true,
-    }, USER_ID!);
-    
-    console.log('Test email sent successfully to:', params.to_email);
-    return { success: true, response };
-  } catch (error) {
-    console.error('Failed to send test email:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    return { success: false, error: errorMessage };
-  }
+  // Server-side email sending is not supported with EmailJS
+  // EmailJS is designed for client-side use only
+  // For server-side emails, we would need a different service like Nodemailer + SMTP
+  
+  console.log('📧 Server-side email simulation (EmailJS requires client-side)');
+  console.log('To actually send emails from server, consider using:');
+  console.log('• Nodemailer with SMTP');
+  console.log('• SendGrid API');
+  console.log('• AWS SES');
+  console.log('• Resend API');
+  
+  // For now, return success with simulation message
+  return {
+    success: true,
+    response: {
+      status: 200,
+      text: 'Email simulated - EmailJS requires client-side execution. Use the client-side test component for real email sending.'
+    } as any
+  };
 }

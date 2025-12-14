@@ -35,6 +35,10 @@ import {
   Trash2,
   Calculator,
   FileText,
+  Sparkles,
+  Mic,
+  HelpCircle,
+  Mail,
 } from 'lucide-react';
 import {Edit2, Download, User} from 'lucide-react';
 import {ThemeToggle} from '../theme-toggle';
@@ -166,9 +170,69 @@ export function ChatLayout() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="h-9">
+                  <Link href="/jarvis-mode" className="gap-3">
+                    <Sparkles className="h-4 w-4" />
+                    <span>Jarvis Mode</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-9">
+                  <Link href="/settings" className="gap-3">
+                    <SettingsIcon className="h-4 w-4" />
+                    <span>All Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </div>
+            
+            <div className="pb-2 mb-2 border-b space-y-1">
+              <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Account
+              </p>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-9">
                   <Link href="/user-management" className="gap-3">
                     <User className="h-4 w-4" />
-                    <span>User Management</span>
+                    <span>Account & Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-9">
+                  <Link href="/profile" className="gap-3">
+                    <User className="h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </div>
+            
+            <div className="pb-2 mb-2 border-b space-y-1">
+              <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Help & Support
+              </p>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-9">
+                  <Link href="/faq" className="gap-3">
+                    <HelpCircle className="h-4 w-4" />
+                    <span>FAQ</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-9">
+                  <Link href="/support" className="gap-3">
+                    <Mail className="h-4 w-4" />
+                    <span>Support</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="h-9">
+                  <Link href="/documentation" className="gap-3">
+                    <FileText className="h-4 w-4" />
+                    <span>Documentation</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

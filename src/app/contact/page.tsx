@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/page-header';
-import { sendContactEmail } from '@/lib/email';
+import emailjs from 'emailjs-com';
 
 export default function ContactPage() {
   const { toast } = useToast();
@@ -29,19 +29,34 @@ export default function ContactPage() {
     
     setIsSubmitting(true);
 
+    // EmailJS configuration
+    const SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+    const TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+    const USER_ID = process.env.NEXT_PUBLIC_EMAILJS_USER_ID;
+
+    if (!SERVICE_ID || !TEMPLATE_ID || !USER_ID) {
+      toast({
+        title: 'Configuration Error',
+        description: 'Email service is not properly configured. Please contact support.',
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-        // Send contact email to admin
-        const result = await sendContactEmail({
+        // Send contact email using EmailJS client-side
+        const response = await emailjs.send(SERVICE_ID, TEMPLATE_ID, {
           user_name: formData.user_name,
           user_email: formData.user_email,
           message: formData.message,
-        });
+          subject: `Contact Form - ${formData.user_name}`,
+          app_url: process.env.NEXT_PUBLIC_APP_URL || window.location.origin,
+          app_name: 'CODEEX AI',
+          timestamp: new Date().toISOString()
+        }, USER_ID);
 
-        if (!result.success) {
-          throw new Error(result.error || 'Failed to send message');
-        }
-
-        // Contact email sent successfully
+        console.log('Email sent successfully:', response);
         
         toast({
           title: 'Message Sent Successfully! 📧',
@@ -50,12 +65,12 @@ export default function ContactPage() {
         
         setFormData({ user_name: '', user_email: '', message: '' });
 
-    } catch (error: unknown) {
+    } catch (error: any) {
         console.error('Failed to send email:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again later.';
+        const errorMessage = error.text || error.message || 'Failed to send message. Please try again later.';
         
         toast({
-          title: 'Error',
+          title: 'Error Sending Message',
           description: errorMessage,
           variant: 'destructive',
         });

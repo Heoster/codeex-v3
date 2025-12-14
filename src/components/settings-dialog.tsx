@@ -27,14 +27,29 @@ import {useIsMobile} from '@/hooks/use-mobile';
 import {Switch} from '@/components/ui/switch';
 import {useTheme} from 'next-themes';
 import Link from 'next/link';
-import {useState} from 'react';
-import {ChevronDown, Sparkles, Palette, Volume2, Info} from 'lucide-react';
+import {useState, useEffect} from 'react';
+import {ChevronDown, Sparkles, Palette, Volume2, Info, Mic} from 'lucide-react';
+import { JarvisSettings } from './jarvis-settings';
+import type { JarvisConfig } from '@/lib/jarvis-mode';
 
 interface SettingsDialogProps {
   children: ReactNode;
   settings: Settings;
   onSettingsChange: (settings: Settings) => void;
 }
+
+const defaultJarvisConfig: JarvisConfig = {
+  wakeWord: 'hey jarvis',
+  language: 'en-US',
+  voiceStyle: 'friendly',
+  enableWakeWord: false,
+  enableTTS: true,
+  voiceSpeed: 1.0,
+  voicePitch: 1.0,
+  continuousListening: false,
+  emotionalTone: true,
+  contextualAwareness: true
+};
 
 export function SettingsDialog({
   children,
@@ -44,6 +59,25 @@ export function SettingsDialog({
   const {theme, setTheme} = useTheme();
   const isMobile = useIsMobile();
   const [isMobileModelSelectorOpen, setIsMobileModelSelectorOpen] = useState(false);
+  const [jarvisConfig, setJarvisConfig] = useState<JarvisConfig>(defaultJarvisConfig);
+
+  // Load Jarvis config from localStorage
+  useEffect(() => {
+    const savedConfig = localStorage.getItem('jarvis-config');
+    if (savedConfig) {
+      try {
+        setJarvisConfig(JSON.parse(savedConfig));
+      } catch (error) {
+        console.error('Failed to load Jarvis config:', error);
+      }
+    }
+  }, []);
+
+  // Save Jarvis config to localStorage
+  const handleJarvisConfigChange = (newConfig: JarvisConfig) => {
+    setJarvisConfig(newConfig);
+    localStorage.setItem('jarvis-config', JSON.stringify(newConfig));
+  };
 
   return (
     <Dialog>
@@ -57,10 +91,14 @@ export function SettingsDialog({
         </DialogHeader>
 
         <Tabs defaultValue="ai" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="ai" className="gap-2">
               <Sparkles className="h-4 w-4" />
               AI
+            </TabsTrigger>
+            <TabsTrigger value="jarvis" className="gap-2">
+              <Mic className="h-4 w-4" />
+              Jarvis
             </TabsTrigger>
             <TabsTrigger value="appearance" className="gap-2">
               <Palette className="h-4 w-4" />
@@ -163,6 +201,15 @@ export function SettingsDialog({
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="jarvis" className="space-y-4 mt-4">
+            <div className="max-h-[60vh] overflow-y-auto">
+              <JarvisSettings 
+                config={jarvisConfig}
+                onConfigChange={handleJarvisConfigChange}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="appearance" className="space-y-4 mt-4">

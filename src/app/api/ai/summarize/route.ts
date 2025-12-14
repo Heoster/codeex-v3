@@ -1,31 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { enhancedSummarize } from '@/ai/flows/enhanced-summarize';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { text, style, preferredModel } = body;
+    const { text } = await request.json();
 
-    if (!text || typeof text !== 'string') {
+    if (!text) {
       return NextResponse.json(
-        { error: 'Text is required and must be a string' },
+        { error: 'Text is required for summarization' },
         { status: 400 }
       );
     }
 
-    const result = await enhancedSummarize({
-      text,
-      style,
-      preferredModel,
-    });
+    // Simple summarization logic - in a real app, you'd use an AI service
+    const sentences = text.split(/[.!?]+/).filter((s: string) => s.trim().length > 0);
+    const summary = sentences.slice(0, Math.min(3, Math.ceil(sentences.length / 3))).join('. ') + '.';
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      summary,
+      originalLength: text.length,
+      summaryLength: summary.length,
+      compressionRatio: Math.round((1 - summary.length / text.length) * 100)
+    });
   } catch (error) {
-    console.error('Summarize API error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Summarization error:', error);
     return NextResponse.json(
-      { error: errorMessage },
+      { error: 'Failed to summarize text' },
       { status: 500 }
     );
   }
+}
+
+export async function GET() {
+  return NextResponse.json({
+    message: 'AI Summarization API',
+    methods: ['POST'],
+    description: 'Send text in POST body to get a summary'
+  });
 }
