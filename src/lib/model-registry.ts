@@ -4,16 +4,49 @@
  */
 
 import type { ModelConfig, ModelCategory, ProviderConfig, ProviderType } from './model-config';
-import { logEnvValidation } from './env-validation';
 
 interface ModelsConfigStore {
   providers: Record<string, ProviderConfig>;
   models: ModelConfig[];
 }
-import modelsConfigData from './models-config.json';
 
-// Type assertion for the imported JSON
-const modelsConfig = modelsConfigData as ModelsConfigStore;
+// Safe JSON import with fallback
+let modelsConfig: ModelsConfigStore;
+try {
+  const modelsConfigData = require('./models-config.json');
+  modelsConfig = modelsConfigData as ModelsConfigStore;
+} catch (error) {
+  console.error('Failed to load models config:', error);
+  // Fallback configuration
+  modelsConfig = {
+    providers: {
+      groq: {
+        type: 'groq',
+        apiKeyEnvVar: 'GROQ_API_KEY',
+        baseUrl: 'https://api.groq.com/openai/v1',
+        enabled: true
+      }
+    },
+    models: [
+      {
+        id: 'llama-3.1-8b-instant',
+        name: 'Llama 3.1 8B Instant',
+        provider: 'groq',
+        modelId: 'llama-3.1-8b-instant',
+        category: 'general',
+        description: 'Fast and efficient Llama model for general tasks',
+        contextWindow: 131072,
+        supportsStreaming: true,
+        defaultParams: {
+          temperature: 0.7,
+          topP: 0.9,
+          maxOutputTokens: 2048
+        },
+        enabled: true
+      }
+    ]
+  };
+}
 
 // Provider availability cache
 const providerAvailability: Map<ProviderType, boolean> = new Map();
@@ -30,8 +63,13 @@ function checkProviderApiKey(provider: ProviderConfig): boolean {
     return provider.enabled;
   }
   
-  const apiKey = process.env[provider.apiKeyEnvVar];
-  return !!apiKey && apiKey.length > 0;
+  try {
+    const apiKey = process.env[provider.apiKeyEnvVar];
+    return !!apiKey && apiKey.length > 0;
+  } catch (error) {
+    console.warn(`Failed to check API key for ${provider.type}:`, error);
+    return false;
+  }
 }
 
 /**
@@ -50,12 +88,21 @@ function initializeProviderAvailability(): void {
   }
 }
 
-// Initialize on module load
-initializeProviderAvailability();
+// Initialize on module load with error handling
+try {
+  initializeProviderAvailability();
+} catch (error) {
+  console.error('Failed to initialize provider availability:', error);
+}
 
 // Log environment validation (server-side only)
 if (typeof window === 'undefined') {
-  logEnvValidation();
+  try {
+    const { logEnvValidation } = require('./env-validation');
+    logEnvValidation();
+  } catch (error) {
+    console.warn('Environment validation unavailable:', error);
+  }
 }
 
 /**
@@ -221,10 +268,14 @@ export class ModelRegistry {
 
 // Auto-refresh provider availability every 5 minutes (server-side only)
 if (typeof window === 'undefined') {
-  setInterval(() => {
-    const registry = getModelRegistry();
-    registry.refreshProviderAvailability();
-  }, 5 * 60 * 1000);
+  try {
+    setInterval(() => {
+      const registry = getModelRegistry();
+      registry.refreshProviderAvailability();
+    }, 5 * 60 * 1000);
+  } catch (error) {
+    console.warn('Failed to set up auto-refresh:', error);
+  }
 }
 
 // Singleton instance

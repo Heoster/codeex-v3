@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import EmailTestClient from '@/components/email-test-client';
+import ResendEmailTest from '@/components/resend-email-test';
 
 export default function TestEmailPage() {
   const [formData, setFormData] = useState({
@@ -219,9 +220,15 @@ The CODEEX AI Team
         </CardContent>
       </Card>
 
+      {/* Resend Email Test (Recommended) */}
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-4 text-center">Resend Email Test (Recommended)</h2>
+        <ResendEmailTest />
+      </div>
+
       {/* Client-Side Email Test */}
       <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-4 text-center">Client-Side Email Test</h2>
+        <h2 className="text-xl font-semibold mb-4 text-center">Client-Side Email Test (EmailJS)</h2>
         <EmailTestClient />
       </div>
 
