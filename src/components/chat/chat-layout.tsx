@@ -68,6 +68,7 @@ export function ChatLayout() {
     createNewChat,
     deleteAllUserChats,
     addMessage,
+    deleteMessage,
     deleteChat,
     renameChat,
     exportChat,
@@ -373,6 +374,7 @@ export function ChatLayout() {
             settings={settings}
             messages={activeChatMessages}
             addMessage={addMessage}
+            deleteMessage={deleteMessage}
           />
         ) : (
           <div className="flex h-[calc(100vh-4rem)] items-center justify-center px-4">

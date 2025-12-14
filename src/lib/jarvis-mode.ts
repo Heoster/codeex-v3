@@ -4,6 +4,8 @@
  * emotional tone, and adaptive responses for fluid, human-like conversations.
  */
 
+import { EnhancedTTS, createEnhancedTTS, type EnhancedTTSConfig } from './enhanced-tts';
+
 export interface JarvisConfig {
   wakeWord: string;
   language: string;
@@ -29,7 +31,7 @@ export interface JarvisState {
 
 export class JarvisMode {
   private recognition: any = null;
-  private synthesis: SpeechSynthesis | null = null;
+  private enhancedTTS: EnhancedTTS | null = null;
   private audioContext: AudioContext | null = null;
   private config: JarvisConfig;
   private state: JarvisState;
@@ -68,9 +70,27 @@ export class JarvisMode {
       this.setupSpeechRecognition();
     }
 
-    // Initialize Speech Synthesis
-    if ('speechSynthesis' in window) {
-      this.synthesis = window.speechSynthesis;
+    // Initialize Enhanced Text-to-Speech
+    if (this.config.enableTTS) {
+      this.enhancedTTS = createEnhancedTTS(
+        this.config.language,
+        this.config.voiceStyle === 'magical' ? 'magical' : 
+        this.config.voiceStyle === 'professional' ? 'professional' : 'friendly',
+        (isSpeaking: boolean) => {
+          this.state.isSpeaking = isSpeaking;
+          this.onStateChange(this.state);
+        }
+      );
+
+      // Update TTS configuration
+      this.enhancedTTS.updateConfig({
+        speed: this.config.voiceSpeed,
+        pitch: this.config.voicePitch,
+        emotionalTone: this.config.emotionalTone,
+        naturalPauses: true,
+        useSSML: true,
+        voiceEnhancement: true
+      });
     }
 
     // Initialize Audio Context for sound effects
@@ -286,82 +306,118 @@ export class JarvisMode {
     }
   }
 
-  public speak(text: string) {
-    if (!this.synthesis || !this.config.enableTTS) return;
+  public async speak(text: string) {
+    if (!this.enhancedTTS || !this.config.enableTTS) return;
 
-    // Cancel any ongoing speech
-    this.synthesis.cancel();
+    // Enhance text based on emotional state and context
+    const enhancedText = this.enhanceTextForSpeech(text);
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = this.config.voiceSpeed;
-    utterance.pitch = this.config.voicePitch;
-    
-    // Select voice based on style
-    const voices = this.synthesis.getVoices();
-    const preferredVoice = this.selectVoiceByStyle(voices);
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-
-    utterance.onstart = () => {
-      this.state.isSpeaking = true;
-      this.onStateChange(this.state);
-    };
-
-    utterance.onend = () => {
-      this.state.isSpeaking = false;
-      this.onStateChange(this.state);
+    try {
+      await this.enhancedTTS.speak(enhancedText);
       
       // Resume listening if continuous mode is enabled
-      if (this.state.isActive && this.config.continuousListening) {
-        setTimeout(() => this.startListening(), 500);
+      if (this.state.isActive && this.config.continuousListening && !this.state.isSpeaking) {
+        setTimeout(() => this.startListening(), 800);
       }
-    };
-
-    utterance.onerror = () => {
+    } catch (error) {
+      console.error('Enhanced TTS Error:', error);
       this.state.isSpeaking = false;
       this.onStateChange(this.state);
-    };
-
-    this.synthesis.speak(utterance);
+    }
   }
 
-  private selectVoiceByStyle(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
-    if (voices.length === 0) return null;
+  private enhanceTextForSpeech(text: string): string {
+    let enhancedText = text;
 
-    // Filter by language first
-    const languageVoices = voices.filter(voice => 
-      voice.lang.startsWith(this.config.language.split('-')[0])
-    );
+    // Add personality based on voice style and emotional state
+    if (this.config.voiceStyle === 'magical' || this.state.emotionalState === 'magical') {
+      enhancedText = this.addMagicalPersonality(enhancedText);
+    } else if (this.config.voiceStyle === 'professional') {
+      enhancedText = this.addProfessionalTone(enhancedText);
+    } else if (this.config.voiceStyle === 'friendly') {
+      enhancedText = this.addFriendlyTone(enhancedText);
+    }
 
-    const voicesToSearch = languageVoices.length > 0 ? languageVoices : voices;
+    // Add emotional expression based on current state
+    if (this.config.emotionalTone) {
+      enhancedText = this.addEmotionalExpression(enhancedText);
+    }
 
-    switch (this.config.voiceStyle) {
-      case 'professional':
-        return voicesToSearch.find(voice => 
-          voice.name.toLowerCase().includes('professional') ||
-          voice.name.toLowerCase().includes('business') ||
-          voice.name.toLowerCase().includes('daniel') ||
-          voice.name.toLowerCase().includes('alex')
-        ) || voicesToSearch[0];
-        
-      case 'friendly':
-        return voicesToSearch.find(voice => 
-          voice.name.toLowerCase().includes('friendly') ||
-          voice.name.toLowerCase().includes('samantha') ||
-          voice.name.toLowerCase().includes('karen') ||
-          voice.name.toLowerCase().includes('susan')
-        ) || voicesToSearch[0];
-        
-      case 'magical':
-        return voicesToSearch.find(voice => 
-          voice.name.toLowerCase().includes('novelty') ||
-          voice.name.toLowerCase().includes('whisper') ||
-          voice.name.toLowerCase().includes('ethereal')
-        ) || voicesToSearch[0];
-        
+    return enhancedText;
+  }
+
+  private addMagicalPersonality(text: string): string {
+    // Add magical flair to responses
+    const magicalPhrases = [
+      'Ah, let me conjure that information for you',
+      'By the power of artificial intelligence',
+      'Allow me to weave together the answer',
+      'From the digital realm, I bring you'
+    ];
+
+    // Occasionally add magical introductions
+    if (Math.random() < 0.3 && !text.toLowerCase().startsWith('i ')) {
+      const intro = magicalPhrases[Math.floor(Math.random() * magicalPhrases.length)];
+      return `${intro}... ${text}`;
+    }
+
+    return text;
+  }
+
+  private addProfessionalTone(text: string): string {
+    // Ensure professional language
+    return text
+      .replace(/\bawesome\b/gi, 'excellent')
+      .replace(/\bcool\b/gi, 'impressive')
+      .replace(/\bgreat\b/gi, 'outstanding');
+  }
+
+  private addFriendlyTone(text: string): string {
+    // Add friendly expressions
+    const friendlyIntros = [
+      'Oh, that\'s a great question!',
+      'I\'d be happy to help with that!',
+      'Sure thing!',
+      'Absolutely!'
+    ];
+
+    // Occasionally add friendly introductions
+    if (Math.random() < 0.2 && text.length > 50) {
+      const intro = friendlyIntros[Math.floor(Math.random() * friendlyIntros.length)];
+      return `${intro} ${text}`;
+    }
+
+    return text;
+  }
+
+  private addEmotionalExpression(text: string): string {
+    switch (this.state.emotionalState) {
+      case 'excited':
+        return text.replace(/\./g, '!').replace(/\b(amazing|great|awesome)\b/gi, '$1!');
+      case 'helpful':
+        return `I'm here to help! ${text}`;
+      case 'focused':
+        return text.replace(/\b(important|key|critical)\b/gi, '*$1*');
       default:
-        return voicesToSearch[0];
+        return text;
+    }
+  }
+
+  public pauseSpeech(): void {
+    if (this.enhancedTTS) {
+      this.enhancedTTS.pause();
+    }
+  }
+
+  public resumeSpeech(): void {
+    if (this.enhancedTTS) {
+      this.enhancedTTS.resume();
+    }
+  }
+
+  public stopSpeech(): void {
+    if (this.enhancedTTS) {
+      this.enhancedTTS.stop();
     }
   }
 
@@ -448,6 +504,18 @@ export class JarvisMode {
       this.recognition.continuous = this.config.continuousListening;
       this.recognition.lang = this.config.language;
     }
+
+    // Update enhanced TTS settings
+    if (this.enhancedTTS) {
+      this.enhancedTTS.updateConfig({
+        language: this.config.language,
+        voiceStyle: this.config.voiceStyle === 'magical' ? 'magical' : 
+                   this.config.voiceStyle === 'professional' ? 'professional' : 'friendly',
+        speed: this.config.voiceSpeed,
+        pitch: this.config.voicePitch,
+        emotionalTone: this.config.emotionalTone
+      });
+    }
   }
 
   public getState(): JarvisState {
@@ -460,8 +528,8 @@ export class JarvisMode {
 
   public destroy() {
     this.stopListening();
-    if (this.synthesis) {
-      this.synthesis.cancel();
+    if (this.enhancedTTS) {
+      this.enhancedTTS.destroy();
     }
     if (this.audioContext && this.audioContext.state !== 'closed') {
       this.audioContext.close();

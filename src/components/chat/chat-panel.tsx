@@ -8,7 +8,7 @@ import {MemoryManager} from '@/components/memory-manager';
 import {useState, useRef, useEffect, useCallback} from 'react';
 import {generateResponse} from '@/app/actions';
 import {useAuth} from '@/hooks/use-auth';
-import {browserTTS} from '@/lib/browser-tts';
+import {EnhancedTTS, createEnhancedTTS} from '@/lib/enhanced-tts';
 
 interface ChatPanelProps {
   chat: Chat;
@@ -19,6 +19,7 @@ interface ChatPanelProps {
     message: Omit<Message, 'id' | 'createdAt'>,
     newTitle?: string
   ) => void;
+  deleteMessage: (chatId: string, messageId: string) => void;
 }
 
 export function ChatPanel({
@@ -26,12 +27,26 @@ export function ChatPanel({
   settings,
   messages,
   addMessage,
+  deleteMessage,
 }: ChatPanelProps) {
   const [isLoadingFromAI, setIsLoadingFromAI] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [lastRequestTime, setLastRequestTime] = useState(0);
   const [showMemoryManager, setShowMemoryManager] = useState(false);
+  const [enhancedTTS, setEnhancedTTS] = useState<EnhancedTTS | null>(null);
   const {user} = useAuth();
+
+  // Initialize Enhanced TTS
+  useEffect(() => {
+    if (settings.enableSpeech) {
+      const tts = createEnhancedTTS('en-US', 'friendly', setIsSpeaking);
+      setEnhancedTTS(tts);
+      
+      return () => {
+        tts.destroy();
+      };
+    }
+  }, [settings.enableSpeech]);
 
   const settingsRef = useRef(settings);
   useEffect(() => {
@@ -42,6 +57,13 @@ export function ChatPanel({
   
   // Rate limiting: minimum 2 seconds between requests
   const MIN_REQUEST_INTERVAL = 2000;
+
+  const handleDeleteMessage = useCallback(
+    (messageId: string) => {
+      deleteMessage(chat.id, messageId);
+    },
+    [deleteMessage, chat.id]
+  );
 
   const handleSendMessage = useCallback(
     async (messageContent: string) => {
@@ -108,41 +130,37 @@ export function ChatPanel({
       }
       setIsLoadingFromAI(false);
 
-      if (settingsRef.current.enableSpeech && assistantContent) {
-        // Use browser's Web Speech API (free, no API key required)
-        if (!browserTTS.isAvailable()) {
-          console.error('Speech synthesis not supported in this browser');
-          return;
-        }
+      // Enhanced TTS for AI responses
+      if (settingsRef.current.enableSpeech && assistantContent && enhancedTTS) {
+        try {
+          // Clean the text for better speech
+          const cleanText = assistantContent
+            .replace(/\*\*(.*?)\*\*/g, '$1') // Remove markdown bold
+            .replace(/\*(.*?)\*/g, '$1') // Remove markdown italic
+            .replace(/`(.*?)`/g, '$1') // Remove code backticks
+            .replace(/#{1,6}\s/g, '') // Remove markdown headers
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
+            .replace(/\n+/g, '. ') // Convert newlines to pauses
+            .trim();
 
-        setIsSpeaking(true);
-        browserTTS.speak({
-          text: assistantContent,
-          voice: settingsRef.current.voice,
-          onStart: () => {
-            console.log('Speech started');
-          },
-          onEnd: () => {
-            setIsSpeaking(false);
-          },
-          onError: (error: string) => {
-            console.error('Speech error:', error);
-            setIsSpeaking(false);
-          },
-        });
+          await enhancedTTS.speak(cleanText);
+        } catch (error) {
+          console.error('Enhanced TTS error:', error);
+          setIsSpeaking(false);
+        }
       }
     },
-    [isLoading, messages, addMessage, chat.id, lastRequestTime]
+    [isLoading, messages, addMessage, chat.id, lastRequestTime, enhancedTTS]
   );
 
   useEffect(() => {
     // Load voices when they're available
-    const voices = browserTTS.getVoices();
-    if (voices.length === 0) {
-      // Wait for voices to load
-      if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        // Wait for voices to load
         window.speechSynthesis.onvoiceschanged = () => {
-          browserTTS.getVoices();
+          window.speechSynthesis.getVoices();
         };
       }
     }
@@ -170,6 +188,7 @@ export function ChatPanel({
         isLoading={isLoadingFromAI}
         className="flex-1"
         header={greetingHeader}
+        onDeleteMessage={handleDeleteMessage}
       />
 
       {messages.length <= 1 && (
@@ -185,6 +204,36 @@ export function ChatPanel({
             isLoading={isLoading}
             onOpenMemoryManager={() => setShowMemoryManager(true)}
           />
+          
+          {/* TTS Controls */}
+          {isSpeaking && enhancedTTS && (
+            <div className="flex items-center justify-center gap-2 p-2 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                AI is speaking...
+              </div>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => enhancedTTS.pause()}
+                  className="px-2 py-1 text-xs bg-background rounded hover:bg-muted transition-colors"
+                >
+                  Pause
+                </button>
+                <button
+                  onClick={() => enhancedTTS.resume()}
+                  className="px-2 py-1 text-xs bg-background rounded hover:bg-muted transition-colors"
+                >
+                  Resume
+                </button>
+                <button
+                  onClick={() => enhancedTTS.stop()}
+                  className="px-2 py-1 text-xs bg-destructive text-destructive-foreground rounded hover:bg-destructive/90 transition-colors"
+                >
+                  Stop
+                </button>
+              </div>
+            </div>
+          )}
           <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
             <p className="hidden sm:block">
               Try commands like{' '}

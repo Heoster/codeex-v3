@@ -1,7 +1,7 @@
 'use client';
 
 import {useState, useEffect} from 'react';
-import {User, Copy, Check} from 'lucide-react';
+import {User, Copy, Check, Volume2, VolumeX, Trash2, MoreHorizontal} from 'lucide-react';
 import {cn} from '@/lib/utils';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {type Message} from '@/lib/types';
@@ -12,19 +12,39 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {MessageAttribution} from './message-attribution';
 import {Button} from '@/components/ui/button';
+import {createEnhancedTTS} from '@/lib/enhanced-tts';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ChatMessageProps {
   message: Message;
+  onDelete?: (messageId: string) => void;
 }
 
-export function ChatMessage({message}: ChatMessageProps) {
+export function ChatMessage({message, onDelete}: ChatMessageProps) {
   const {user} = useAuth();
   const [isMounted, setIsMounted] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [tts, setTTS] = useState<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    
+    // Initialize TTS for this message
+    if (message.role === 'assistant') {
+      const enhancedTTS = createEnhancedTTS('en-US', 'friendly', setIsSpeaking);
+      setTTS(enhancedTTS);
+      
+      return () => {
+        enhancedTTS.destroy();
+      };
+    }
+  }, [message.role]);
 
   const isAssistant = message.role === 'assistant';
 
@@ -32,6 +52,38 @@ export function ChatMessage({message}: ChatMessageProps) {
     await navigator.clipboard.writeText(message.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSpeak = async () => {
+    if (!tts) return;
+    
+    if (isSpeaking) {
+      tts.stop();
+      return;
+    }
+
+    // Clean the text for better speech
+    const cleanText = message.content
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove markdown bold
+      .replace(/\*(.*?)\*/g, '$1') // Remove markdown italic
+      .replace(/`(.*?)`/g, '$1') // Remove code backticks
+      .replace(/#{1,6}\s/g, '') // Remove markdown headers
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
+      .replace(/\n+/g, '. ') // Convert newlines to pauses
+      .trim();
+
+    try {
+      await tts.speak(cleanText);
+    } catch (error) {
+      console.error('TTS Error:', error);
+      setIsSpeaking(false);
+    }
+  };
+
+  const handleDelete = () => {
+    if (onDelete && message.id) {
+      onDelete(message.id);
+    }
   };
 
   if (!isMounted) {
@@ -129,35 +181,122 @@ export function ChatMessage({message}: ChatMessageProps) {
             )}
           </div>
 
+          {/* Action Buttons */}
           <div className={cn(
-            'flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity',
-            !isAssistant && 'flex-row-reverse'
+            'flex items-center gap-1 mt-2',
+            !isAssistant && 'justify-end'
           )}>
             {displayTimestamp && (
-              <span className="text-xs text-muted-foreground px-2">
+              <span className="text-xs text-muted-foreground px-2 mr-auto">
                 {displayTimestamp}
               </span>
             )}
             
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={handleCopy}
-                >
-                  {copied ? (
-                    <Check className="h-3.5 w-3.5 text-green-500" />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5" />
+            {/* Enhanced Action Buttons */}
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+              {/* Copy Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs hover:bg-muted/80"
+                    onClick={handleCopy}
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1 text-green-500" />
+                        <span className="text-green-500">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3 w-3 mr-1" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Copy message to clipboard</p>
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Text-to-Speech Button (AI messages only) */}
+              {isAssistant && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "h-7 px-2 text-xs hover:bg-muted/80",
+                        isSpeaking && "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                      )}
+                      onClick={handleSpeak}
+                      disabled={!tts}
+                    >
+                      {isSpeaking ? (
+                        <>
+                          <VolumeX className="h-3 w-3 mr-1" />
+                          <span>Stop</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="h-3 w-3 mr-1" />
+                          <span>Hear</span>
+                        </>
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{isSpeaking ? 'Stop speaking' : 'Read message aloud'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              {/* More Actions Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs hover:bg-muted/80"
+                  >
+                    <MoreHorizontal className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem
+                    onClick={handleCopy}
+                    className="text-xs"
+                  >
+                    <Copy className="h-3 w-3 mr-2" />
+                    Copy text
+                  </DropdownMenuItem>
+                  
+                  {isAssistant && (
+                    <DropdownMenuItem
+                      onClick={handleSpeak}
+                      className="text-xs"
+                      disabled={!tts}
+                    >
+                      <Volume2 className="h-3 w-3 mr-2" />
+                      {isSpeaking ? 'Stop speaking' : 'Read aloud'}
+                    </DropdownMenuItem>
                   )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{copied ? 'Copied!' : 'Copy message'}</p>
-              </TooltipContent>
-            </Tooltip>
+                  
+                  {onDelete && (
+                    <DropdownMenuItem
+                      onClick={handleDelete}
+                      className="text-xs text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3 mr-2" />
+                      Delete message
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </div>

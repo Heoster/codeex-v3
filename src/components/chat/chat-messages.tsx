@@ -11,6 +11,7 @@ interface ChatMessagesProps extends React.HTMLAttributes<HTMLDivElement> {
   messages: Message[];
   isLoading?: boolean;
   header?: React.ReactNode;
+  onDeleteMessage?: (messageId: string) => void;
 }
 
 export function ChatMessages({
@@ -18,6 +19,7 @@ export function ChatMessages({
   isLoading,
   className,
   header,
+  onDeleteMessage,
 }: ChatMessagesProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -39,7 +41,10 @@ export function ChatMessages({
               className="chat-message-enter"
               style={{ animationDelay: `${Math.min(index * 50, 500)}ms` }}
             >
-              <ChatMessage message={message} />
+              <ChatMessage 
+                message={message} 
+                onDelete={onDeleteMessage}
+              />
             </div>
           ))}
           {isLoading && (

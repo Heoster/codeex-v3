@@ -146,6 +146,28 @@ export function useChatHistory() {
     [setChats, setMessages]
   );
 
+  const deleteMessage = useCallback(
+    (chatId: string, messageId: string) => {
+      setMessages(prev => ({
+        ...prev,
+        [chatId]: (prev[chatId] || []).filter(msg => msg.id !== messageId),
+      }));
+
+      // Update chat's updatedAt timestamp
+      setChats(prev =>
+        prev.map(chat =>
+          chat.id === chatId
+            ? {
+                ...chat,
+                updatedAt: new Date().toISOString(),
+              }
+            : chat
+        )
+      );
+    },
+    [setChats, setMessages]
+  );
+
   const activeChat = chats.find(c => c.id === activeChatId);
   const activeChatMessages = messages[activeChatId] || [];
 
@@ -161,6 +183,7 @@ export function useChatHistory() {
     createNewChat,
     deleteAllUserChats,
     addMessage,
+    deleteMessage,
     deleteChat,
     renameChat,
     exportChat,
