@@ -145,7 +145,7 @@ const nextConfig = {
               "connect-src 'self' https://api.groq.com https://router.huggingface.co https://generativelanguage.googleapis.com https://duckduckgo.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com https://firebaseinstallations.googleapis.com https://api.emailjs.com wss:",
               "worker-src 'self' blob:",
               "child-src 'self' blob:",
-              "frame-src 'self' https://www.google.com https://www.recaptcha.net https://recaptcha.google.com",
+              "frame-src 'self' https://www.google.com https://www.recaptcha.net https://recaptcha.google.com https://codeex-ai-v3.firebaseapp.com https://*.firebaseapp.com",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
