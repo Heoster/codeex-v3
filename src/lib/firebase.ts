@@ -8,22 +8,14 @@ import {
   AppCheck,
 } from 'firebase/app-check';
 
-// Safe environment variable access with fallbacks
-const getEnvVar = (key: string, fallback: string = ''): string => {
-  if (typeof window !== 'undefined') {
-    return (window as any).__NEXT_DATA__?.env?.[key] || fallback;
-  }
-  return process.env[key] || fallback;
-};
-
 const firebaseConfig = {
-  apiKey: getEnvVar('NEXT_PUBLIC_FIREBASE_API_KEY'),
-  authDomain: getEnvVar('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'),
-  projectId: getEnvVar('NEXT_PUBLIC_FIREBASE_PROJECT_ID'),
-  storageBucket: getEnvVar('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET'),
-  messagingSenderId: getEnvVar('NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'),
-  appId: getEnvVar('NEXT_PUBLIC_FIREBASE_APP_ID'),
-  measurementId: getEnvVar('NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID'),
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Comprehensive validation to ensure Firebase config is loaded
@@ -68,16 +60,21 @@ let appCheckInstance: AppCheck | undefined;
 
 if (typeof window !== 'undefined') {
   try {
-    const recaptchaKey = getEnvVar('NEXT_PUBLIC_RECAPTCHA_V3_SITE_KEY');
-    const isDev = getEnvVar('NODE_ENV') === 'development';
+    const recaptchaKey = process.env.NEXT_PUBLIC_RECAPTCHA_V3_SITE_KEY;
+    const isDev = process.env.NODE_ENV === 'development';
     
+    // Temporarily disable App Check to fix authentication issues
+    // App Check can cause authentication failures if not properly configured
+    // TODO: Re-enable after proper Firebase App Check setup
+    console.log('App Check temporarily disabled for authentication stability');
+    
+    /*
     // Only initialize App Check if a valid reCAPTCHA key is provided
-    // In development, App Check is optional - skip if key causes errors
-    if (recaptchaKey && recaptchaKey.length > 10 && !recaptchaKey.startsWith('your_') && !recaptchaKey.startsWith('6Lf')) {
+    if (recaptchaKey && recaptchaKey.length > 10 && !recaptchaKey.startsWith('your_')) {
       try {
         appCheckInstance = initializeAppCheck(app, {
           provider: new ReCaptchaV3Provider(recaptchaKey),
-          isTokenAutoRefreshEnabled: !isDev, // Disable auto-refresh in dev to reduce errors
+          isTokenAutoRefreshEnabled: !isDev,
         });
       } catch (e) {
         if (!isDev) {
@@ -85,6 +82,7 @@ if (typeof window !== 'undefined') {
         }
       }
     }
+    */
   } catch (error) {
     console.warn('App Check initialization skipped due to error:', error);
   }

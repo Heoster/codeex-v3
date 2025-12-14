@@ -14,6 +14,7 @@ import ErrorBoundary from '@/components/error-boundary';
 import { StructuredData } from '@/components/seo/structured-data';
 import { defaultSEO } from '@/lib/seo-config';
 import { AnalyticsProvider } from '@/components/analytics/analytics-provider';
+import '@/lib/runtime-error-handler'; // Initialize error handler
 
 const manrope = Manrope({
   subsets: ['latin'],
