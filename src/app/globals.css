@@ -734,3 +734,130 @@ html {
     transform: none;
   }
 }
+/* Launch Celebration Animations */
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
+  50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.6), 0 0 60px rgba(255, 255, 255, 0.4); }
+}
+
+@keyframes rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.launch-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.launch-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.launch-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.launch-rainbow {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: rainbow 3s ease infinite;
+}
+
+/* Celebration Confetti */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.confetti {
+  animation: confetti-fall 3s linear infinite;
+}
+
+/* Launch Button Special Effects */
+.launch-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.launch-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.launch-button:hover::before {
+  left: 100%;
+}
+
+/* Countdown Timer Glow */
+.countdown-box {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Terminal/Console Styling */
+.launch-console {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 50, 0, 0.8));
+  border: 2px solid #00ff00;
+  box-shadow: 
+    0 0 20px rgba(0, 255, 0, 0.3),
+    inset 0 0 20px rgba(0, 255, 0, 0.1);
+}
+
+.launch-console::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #00ff00, #00aa00, #00ff00);
+  border-radius: inherit;
+  z-index: -1;
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Success Message Styling */
+.success-text {
+  text-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(255, 255, 255, 0.6),
+    0 0 30px rgba(255, 255, 255, 0.4);
+}
+
+/* Website Link Special Styling */
+.website-link {
+  font-family: 'Orbitron', 'Space Grotesk', 'Inter', sans-serif;
+  background: linear-gradient(45deg, #ffd700, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow 3s ease infinite;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
