@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-13T10:58:58.057Z",
+  "timestamp": "2025-12-14T07:13:01.846Z",
   "totalTests": 22,
   "successfulTests": 22,
   "successRate": 100,
@@ -27,12 +27,12 @@
   },
   "modelStats": {
     "llama-3.1-8b-instant": {
-      "total": 8,
-      "success": 8
+      "total": 6,
+      "success": 6
     },
     "llama-3.1-8b-instruct-hf": {
-      "total": 7,
-      "success": 7
+      "total": 5,
+      "success": 5
     },
     "gemini-2.5-flash": {
       "total": 6,
@@ -46,7 +46,7 @@
       "model": "llama-3.1-8b-instant",
       "success": true,
       "modelUsed": "llama-3.1-8b-instant",
-      "responseLength": 515
+      "responseLength": 561
     },
     {
       "service": "solve",
@@ -54,7 +54,7 @@
       "model": "llama-3.1-8b-instruct-hf",
       "success": true,
       "modelUsed": "llama-3.1-8b-instruct-hf",
-      "responseLength": 705
+      "responseLength": 569
     },
     {
       "service": "solve",
@@ -62,7 +62,7 @@
       "model": "llama-3.1-8b-instant",
       "success": true,
       "modelUsed": "llama-3.1-8b-instant",
-      "responseLength": 1377
+      "responseLength": 1104
     },
     {
       "service": "solve",
@@ -70,7 +70,7 @@
       "model": "llama-3.1-8b-instruct-hf",
       "success": true,
       "modelUsed": "llama-3.1-8b-instruct-hf",
-      "responseLength": 1246
+      "responseLength": 1910
     },
     {
       "service": "solve",
@@ -78,7 +78,7 @@
       "model": "llama-3.1-8b-instant",
       "success": true,
       "modelUsed": "llama-3.1-8b-instant",
-      "responseLength": 1681
+      "responseLength": 1523
     },
     {
       "service": "solve",
@@ -86,39 +86,35 @@
       "model": "llama-3.1-8b-instruct-hf",
       "success": true,
       "modelUsed": "llama-3.1-8b-instruct-hf",
-      "responseLength": 1632
+      "responseLength": 1265
     },
     {
       "service": "summarize",
       "testCase": "Short Article",
       "model": "llama-3.1-8b-instant",
       "success": true,
-      "modelUsed": "llama-3.1-8b-instant",
-      "responseLength": 427
+      "responseLength": 287
     },
     {
       "service": "summarize",
       "testCase": "Short Article",
       "model": "llama-3.1-8b-instruct-hf",
       "success": true,
-      "modelUsed": "llama-3.1-8b-instruct-hf",
-      "responseLength": 347
+      "responseLength": 287
     },
     {
       "service": "summarize",
       "testCase": "Technical Content",
       "model": "llama-3.1-8b-instant",
       "success": true,
-      "modelUsed": "llama-3.1-8b-instant",
-      "responseLength": 830
+      "responseLength": 206
     },
     {
       "service": "summarize",
       "testCase": "Technical Content",
       "model": "llama-3.1-8b-instruct-hf",
       "success": true,
-      "modelUsed": "llama-3.1-8b-instruct-hf",
-      "responseLength": 837
+      "responseLength": 206
     },
     {
       "service": "search",
@@ -126,7 +122,7 @@
       "model": "llama-3.1-8b-instant",
       "success": true,
       "modelUsed": "llama-3.1-8b-instant",
-      "responseLength": 1114,
+      "responseLength": 1089,
       "sourcesCount": 0
     },
     {
@@ -135,7 +131,7 @@
       "model": "llama-3.1-8b-instruct-hf",
       "success": true,
       "modelUsed": "llama-3.1-8b-instruct-hf",
-      "responseLength": 950,
+      "responseLength": 907,
       "sourcesCount": 0
     },
     {
@@ -144,7 +140,7 @@
       "model": "llama-3.1-8b-instant",
       "success": true,
       "modelUsed": "llama-3.1-8b-instant",
-      "responseLength": 1071,
+      "responseLength": 1085,
       "sourcesCount": 3
     },
     {
@@ -153,7 +149,7 @@
       "model": "llama-3.1-8b-instruct-hf",
       "success": true,
       "modelUsed": "llama-3.1-8b-instruct-hf",
-      "responseLength": 1147,
+      "responseLength": 1027,
       "sourcesCount": 3
     },
     {
@@ -162,7 +158,7 @@
       "model": "gemini-2.5-flash",
       "success": true,
       "modelUsed": "gemini-2.5-flash",
-      "responseLength": 236,
+      "responseLength": 310,
       "recognized": true
     },
     {
@@ -171,7 +167,7 @@
       "model": "auto",
       "success": true,
       "modelUsed": "gemini-2.5-flash",
-      "responseLength": 281,
+      "responseLength": 234,
       "recognized": true
     },
     {
@@ -180,7 +176,7 @@
       "model": "gemini-2.5-flash",
       "success": true,
       "modelUsed": "gemini-2.5-flash",
-      "responseLength": 181,
+      "responseLength": 262,
       "recognized": true
     },
     {
@@ -189,7 +185,7 @@
       "model": "auto",
       "success": true,
       "modelUsed": "gemini-2.5-flash",
-      "responseLength": 219,
+      "responseLength": 169,
       "recognized": true
     },
     {
@@ -198,7 +194,7 @@
       "model": "gemini-2.5-flash",
       "success": true,
       "modelUsed": "gemini-2.5-flash",
-      "responseLength": 555
+      "responseLength": 411
     },
     {
       "service": "pdf-analyzer",
@@ -206,7 +202,7 @@
       "model": "auto",
       "success": true,
       "modelUsed": "gemini-2.5-flash",
-      "responseLength": 726
+      "responseLength": 319
     },
     {
       "service": "pdf-analyzer",
@@ -214,7 +210,7 @@
       "model": "gemini-2.5-flash",
       "success": true,
       "modelUsed": "llama-3.1-8b-instant",
-      "responseLength": 1606
+      "responseLength": 1615
     },
     {
       "service": "pdf-analyzer",

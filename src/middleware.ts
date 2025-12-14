@@ -63,9 +63,10 @@ function cleanupRateLimitStore(): void {
 setInterval(cleanupRateLimitStore, 300000);
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const origin = request.headers.get('origin');
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+  try {
+    const { pathname } = request.nextUrl;
+    const origin = request.headers.get('origin');
+    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
 
   // Apply rate limiting to API routes
   if (pathname.startsWith('/api/')) {
@@ -134,8 +135,12 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  // Security headers for all other routes (handled by next.config.js headers)
-  return NextResponse.next();
+    // Security headers for all other routes (handled by next.config.js headers)
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Middleware error:', error);
+    return NextResponse.next();
+  }
 }
 
 export const config = {

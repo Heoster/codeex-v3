@@ -85,31 +85,35 @@ export function AIThinkingIndicator({
           </span>
         </div>
 
-        {/* Animated skeleton lines */}
-        <div className="rounded-2xl bg-muted/40 p-4 space-y-3">
+        {/* Enhanced animated skeleton with gradient shimmer */}
+        <div className="rounded-2xl bg-gradient-to-br from-muted/40 to-muted/20 p-4 space-y-3 glass">
           <div className="space-y-2">
-            <div className="h-3 w-3/4 rounded bg-muted/60 animate-pulse" />
-            <div className="h-3 w-full rounded bg-muted/60 animate-pulse [animation-delay:0.1s]" />
-            <div className="h-3 w-5/6 rounded bg-muted/60 animate-pulse [animation-delay:0.2s]" />
+            <div className="h-3 w-3/4 rounded bg-gradient-to-r from-muted/60 via-muted/40 to-muted/60 animate-pulse" />
+            <div className="h-3 w-full rounded bg-gradient-to-r from-muted/60 via-muted/40 to-muted/60 animate-pulse animation-delay-200" />
+            <div className="h-3 w-5/6 rounded bg-gradient-to-r from-muted/60 via-muted/40 to-muted/60 animate-pulse animation-delay-300" />
           </div>
 
-          {/* Advanced loading indicator */}
-          <div className="flex items-center gap-3 pt-2">
-            <div className="flex gap-2">
-              <div
-                className="h-2.5 w-2.5 rounded-full bg-primary/50 animate-bounce"
-                style={{ animationDelay: '0s', animationDuration: '1.4s' }}
-              />
-              <div
-                className="h-2.5 w-2.5 rounded-full bg-primary/50 animate-bounce"
-                style={{ animationDelay: '0.2s', animationDuration: '1.4s' }}
-              />
-              <div
-                className="h-2.5 w-2.5 rounded-full bg-primary/50 animate-bounce"
-                style={{ animationDelay: '0.4s', animationDuration: '1.4s' }}
-              />
+          {/* Enhanced loading indicator with voice bars */}
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-3">
+              <div className="voice-bars">
+                <div className="voice-bar" style={{ animationDelay: '0s' }} />
+                <div className="voice-bar" style={{ animationDelay: '0.1s' }} />
+                <div className="voice-bar" style={{ animationDelay: '0.2s' }} />
+                <div className="voice-bar" style={{ animationDelay: '0.3s' }} />
+                <div className="voice-bar" style={{ animationDelay: '0.4s' }} />
+              </div>
+              <span className="text-xs text-muted-foreground/70 animate-pulse">
+                Analyzing and generating response...
+              </span>
             </div>
-            <span className="text-xs text-muted-foreground/70">Processing your request...</span>
+            
+            {/* Processing dots */}
+            <div className="loading-dots">
+              <div className="loading-dot" />
+              <div className="loading-dot" />
+              <div className="loading-dot" />
+            </div>
           </div>
         </div>
       </div>
