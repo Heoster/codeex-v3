@@ -112,10 +112,10 @@ const nextConfig = {
             key: 'X-Content-Type-Options',
             value: 'nosniff'
           },
-          // Prevent clickjacking
+          // Prevent clickjacking (allow Firebase auth)
           {
             key: 'X-Frame-Options',
-            value: 'DENY'
+            value: 'SAMEORIGIN'
           },
           // XSS Protection
           {
@@ -132,26 +132,41 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(self), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
           },
-          // Content Security Policy
+          // Content Security Policy (Firebase Authentication Compatible)
           {
             key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.gstatic.com https://www.google.com https://apis.google.com https://www.recaptcha.net https://www.gstatic.com/recaptcha/ https://www.googletagmanager.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https: http:",
-              "media-src 'self' blob:",
-              "connect-src 'self' https://api.groq.com https://router.huggingface.co https://generativelanguage.googleapis.com https://duckduckgo.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com https://firebaseinstallations.googleapis.com https://api.emailjs.com wss:",
-              "worker-src 'self' blob:",
-              "child-src 'self' blob:",
-              "frame-src 'self' https://www.google.com https://www.recaptcha.net https://recaptcha.google.com https://codeex-ai-v3.firebaseapp.com https://*.firebaseapp.com",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'none'",
-              "upgrade-insecure-requests"
-            ].join('; ')
+            value: process.env.NODE_ENV === 'development' 
+              ? [
+                  "default-src 'self'",
+                  "script-src 'self' 'unsafe-inline' 'unsafe-eval' *",
+                  "style-src 'self' 'unsafe-inline' *",
+                  "font-src 'self' *",
+                  "img-src 'self' data: blob: *",
+                  "media-src 'self' blob: *",
+                  "connect-src 'self' *",
+                  "worker-src 'self' blob:",
+                  "child-src 'self' blob:",
+                  "frame-src 'self' *",
+                  "object-src 'none'",
+                  "base-uri 'self'"
+                ].join('; ')
+              : [
+                  "default-src 'self'",
+                  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.gstatic.com https://www.google.com https://apis.google.com https://www.recaptcha.net https://www.gstatic.com/recaptcha/ https://www.googletagmanager.com",
+                  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+                  "font-src 'self' https://fonts.gstatic.com",
+                  "img-src 'self' data: blob: https: http:",
+                  "media-src 'self' blob:",
+                  "connect-src 'self' https://api.groq.com https://router.huggingface.co https://generativelanguage.googleapis.com https://duckduckgo.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://firebase.googleapis.com https://firebaseinstallations.googleapis.com https://api.emailjs.com https://accounts.google.com https://content.googleapis.com wss:",
+                  "worker-src 'self' blob:",
+                  "child-src 'self' blob:",
+                  "frame-src 'self' https://www.google.com https://www.recaptcha.net https://recaptcha.google.com https://codeex-ai-v3.firebaseapp.com https://*.firebaseapp.com https://accounts.google.com https://content.googleapis.com",
+                  "object-src 'none'",
+                  "base-uri 'self'",
+                  "form-action 'self'",
+                  "frame-ancestors 'none'",
+                  "upgrade-insecure-requests"
+                ].join('; ')
           },
           // Strict Transport Security (HTTPS only)
           {
