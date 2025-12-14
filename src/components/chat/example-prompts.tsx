@@ -26,7 +26,7 @@ const prompts = [
   },
   {
     icon: <FileText className="h-5 w-5" />,
-    text: 'Summarize coding in 3 concise bullet points.',
+    text: 'What is universal contant of gravity.',
     color: 'text-orange-500',
     bgColor: 'bg-orange-500/10',
   },
